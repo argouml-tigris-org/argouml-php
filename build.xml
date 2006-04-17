@@ -4,7 +4,7 @@
      Ant build for ArgoUML PHP module
      ============================================================================ -->
 
-<project name="argouml-module" default="usage" basedir=".">
+<project name="argouml-module" default="compile" basedir=".">
 
   <!-- =================================================================== -->
   <!-- Initialization target                                               -->
@@ -12,23 +12,14 @@
 
  <target name="init">
 
-    <tstamp/>
-
-    <property file="build.properties"/>
     <property file="module.properties"/>
-
-    <property name="Name" value="ArgoModule-${argo.module.name}"/>
-    <property name="name" value="argomodule-${argo.module.name}"/>
-    <property name="version" value="0.9.5-${DSTAMP}-${TSTAMP}"/>
-    <property name="year" value="2001"/>
-
-    <echo message="------------------- ${Name} ${version} [${year}] ----------------"/>
 
     <!-- we really need an absolute path for argo.root.dir -->
     <!-- if it is set in a property file before now, it must be absolute -->
-    <property name="argo.root.dir" value="${basedir}/../.." />
+    <property name="argo.root.dir" value="${basedir}/../argouml" />
     <property file="${override.build.properties}"/>
-    <property file="${argo.root.dir}/src_new/default.properties"/>
+
+    <property name="argo.build.dir" value="${argo.root.dir}/build"/>
 
     <property name="module.root" value="${basedir}"/>
     <property name="module.src.dir" value="${module.root}/src"/>
@@ -44,7 +35,7 @@
     <property name="argo.jarfile"
               value="${argo.build.dir}/argouml.jar"/>
     <property name="module.jarfile.name"
-              value="${argo.module.jarfile}.jar"/>
+              value="argo_php.jar"/>
     <property name="module.jarfile"
               value="${module.build.dir}/${module.jarfile.name}"/>
 
@@ -60,29 +51,6 @@
 
   <!-- Note this file can only make Ant display values set in the file correctly, -->
   <!-- but external values in the environment or properties file will be operational.  -->
-
-  <!-- =================================================================== -->
-  <!-- Help on usage                                                       -->
-  <!-- =================================================================== -->
-  <target name="usage" depends="init">
-    <echo message=""/>
-    <echo message=""/>
-    <echo message="${Name} Build file"/>
-    <echo message="-------------------------------------------------------------"/>
-    <echo message=""/>
-    <echo message=" available targets are:"/>
-    <echo message=""/>
-    <echo message="   compile      --> compiles the source code to the tree under ${module.build.dir}"/>
-    <echo message="   package      --> generates the ${argo.module.jarfile}.jar file"/>
-    <echo message="   run          --> runs ArgoUML ${argo.module.jarfile}.jar"/>
-    <echo message="   install      --> merges ./org into ../src_new/org tree"/>
-    <echo message="   usage        --> show this message (default)"/>
-    <echo message=""/>
-    <echo message=" See the comments inside the build.xml file for more details."/>
-    <echo message="-------------------------------------------------------------"/>
-    <echo message=""/>
-    <echo message=""/>
-  </target>
 
   <!-- =================================================================== -->
   <!-- Prepares the build directory                                        -->
@@ -113,13 +81,7 @@
            optimize="${optimize}">
         <classpath>
             <pathelement location="${argo.build.dir}/argouml.jar"/>
-            <pathelement location="${ocl-argo.jar.path}"/>
-            <pathelement location="${gef.jar.path}"/>
-            <pathelement location="${log4j.jar.path}"/>
-            <pathelement location="${swidgets.jar.path}"/>
-            <pathelement location="${toolbar.jar.path}"/>
-            <pathelement location="${commons-logging.jar.path}"/>
-            <pathelement location="${antlrall.jar.path}"/>
+            <pathelement location="${argo.build.dir}/log4j.jar"/>
             <pathelement location="${argo.build.dir}/argouml-model.jar"/>
         </classpath>
      </javac>
@@ -127,10 +89,9 @@
 
 
   <!-- =================================================================== -->
-  <!-- Creates the class package                                           -->
+  <!-- Creates the class jar                                           -->
   <!-- =================================================================== -->
-  <target name="package" depends="compile">
-    <filter token="version" value="${version}"/>
+  <target name="jar" depends="compile">
     <copy file="${manifest.src}" tofile="${module.build.dest}/${manifest}" filtering="on" overwrite="on" />
     <jar jarfile="${module.jarfile}"
          basedir="${module.build.dest}"
@@ -142,8 +103,7 @@
   <!-- =================================================================== -->
   <!-- Run ArgoUML from compiled sources                                   -->
   <!-- =================================================================== -->
-  <target name="run" depends="package">
-    <echo message="--- Executing ${Name} ---"/>
+  <target name="run" depends="jar">
     <java classname="org.argouml.application.Main"
           fork="yes">
         <classpath>
@@ -176,7 +136,7 @@
   <!-- =================================================================== -->
   <!-- Move the jar file into the extension directory.                     -->
   <!-- =================================================================== -->
-  <target name="install" depends="package">
+  <target name="install" depends="jar">
     <copy todir="${developer.lib.dir}/ext">
       <fileset dir="${module.build.dir}" includes="${module.jarfile.name}"/>
     </copy>
