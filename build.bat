@@ -19,7 +19,6 @@ rem add tools.jar
 if "%JAVA_HOME%" == "" goto NOJAVAHOME
 if exist %JAVA_HOME%\lib\tools.jar SET LOCALCP=%LOCALCP%;%JAVA_HOME%\lib\tools.jar
 if exist %JAVA_HOME%\jre\lib\classes.zip SET LOCALCP=%LOCALCP%;%JAVA_HOME%\jre\lib\classes.zip
-if exist ..\..\lib\nsuml-0.4.20_modified.jar SET LOCALCP=%LOCALCP%;..\..\lib\nsuml-0.4.20_modified.jar
 if exist ..\..\lib\ocl-argo.jar SET LOCALCP=%LOCALCP%;..\..\lib\ocl-argo.jar
 goto RUNANT
 
@@ -32,7 +31,7 @@ echo ***********************************************************
 goto END
 
 :RUNANT
-%JAVA_HOME%\BIN\%JAVACMD% -classpath %LOCALCP% -Dant.home=%ANT_HOME% -Dant.opts=%ANT_OPTS% org.apache.tools.ant.Main %1 %2 %3 %4 %5 %6 %7 %8 %9
+%JAVA_HOME%\BIN\%JAVACMD% -classpath "%LOCALCP%" -Dant.home="%ANT_HOME%" -Dant.opts="%ANT_OPTS%" org.apache.tools.ant.Main %1 %2 %3 %4 %5 %6 %7 %8 %9
 if exist build/argo_php.jar copy build\argo_php.jar ..\..\build\ext
 
 :END
