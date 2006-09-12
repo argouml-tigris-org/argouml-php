@@ -383,7 +383,7 @@ public class GeneratorPHP4
                 return "";
             } 
             String sType = convertType(objType);
-            if (sType != null && sType.trim() != "") {
+            if (sType != null && !"".equals(sType.trim())) {
                     return "return (" + sType + ") $returnValue;";
             } 
             return "return $returnValue;";
@@ -1173,9 +1173,9 @@ public class GeneratorPHP4
             if (sDefault != null) {
             	sDefault = sDefault.trim();
                 if (sDefault.length() > 0) {
-		    if (sDefault == "0") {
-			return sReturn + "false";
-		    } else if (sDefault == "false") {
+                    if ("0".equals(sDefault)) {
+                        return sReturn + "false";
+                    } else if ("false".equals(sDefault)) {
 			return sReturn + "false";
 		    } else {
 			return sReturn + "true";
@@ -1197,7 +1197,7 @@ public class GeneratorPHP4
             }
             return sReturn + "0.0";
         } else if (sType.equals("array")) {
-            if (sDefault != null && sDefault.trim() != "") {
+            if (sDefault != null && !"".equals(sDefault.trim())) {
                 return "array(" + sDefault + ")";
             }
             return "array()";
