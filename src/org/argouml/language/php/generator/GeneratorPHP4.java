@@ -29,22 +29,19 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.TreeMap;
 import java.util.TreeSet;
-
-import javax.swing.Icon;
 
 import org.apache.log4j.Logger;
 import org.argouml.application.ArgoVersion;
-import org.argouml.application.api.Argo;
 import org.argouml.language.php.PHPDocumentor;
 import org.argouml.model.Model;
-import org.argouml.notation.Notation;
 import org.argouml.uml.UUIDHelper;
-import org.argouml.uml.generator.FileGenerator;
-import org.argouml.uml.generator.Generator2;
+import org.argouml.uml.generator.CodeGenerator;
+import org.argouml.uml.generator.TempFileUtils;
+
 
 /**
  * Generator class for PHP 4.x & 5.x source code.
@@ -55,9 +52,7 @@ import org.argouml.uml.generator.Generator2;
  * @author Kai Schr&ouml;der
  * @since ArgoUML 0.15.5
  */
-public class GeneratorPHP4
-    extends Generator2
-    implements FileGenerator {
+public class GeneratorPHP4 implements CodeGenerator {
 
     /**
      * Sets the indentation level to four spaces
@@ -65,24 +60,9 @@ public class GeneratorPHP4
     protected static final String INDENT = "    ";
 
     /**
-     * The name of the language this module generates source code for
-     */
-    protected static final String LANGUAGE_NAME = "PHP";
-
-    /**
-     * Icon to represent this notation in the GUI
-     */
-    protected static final Icon ICON = Argo.lookupIconResource("PHPNotation");
-
-    /**
-     * Info block already written to log file?
-     */
-    protected static final TreeMap TM_INFO_BLOCK_LOGGED = new TreeMap();
-
-    /**
      * The major version of the language this module generates source code for
      */
-    private int iLanguageMajorVersion = LANGUAGE_MAJOR_VERSION;
+    private int iLanguageMajorVersion;
 
     /**
      * source section handler
@@ -94,21 +74,13 @@ public class GeneratorPHP4
      */
     private static final Logger LOG = Logger.getLogger(GeneratorPHP4.class);
 
-    /**
-     * The major version of the language this module generates source code for
-     */
-    private static final int LANGUAGE_MAJOR_VERSION = 4;
-
     // ----- class constructors ------------------------------------------------
 
     /**
      * Zero-argument class constructor
      */
-    private GeneratorPHP4() {
-        super(Notation.makeNotation(LANGUAGE_NAME, LANGUAGE_MAJOR_VERSION
-                + ".x", ICON));
-
-        logModuleInfo();
+    GeneratorPHP4() {
+        this(ModulePHP4.LANGUAGE_MAJOR_VERSION);
     }
 
     /**
@@ -118,39 +90,12 @@ public class GeneratorPHP4
      *                          generates source code for.
      */
     protected GeneratorPHP4(int iLangMajorVersion) {
-        super(Notation.makeNotation(LANGUAGE_NAME, iLangMajorVersion
-                + ".x", ICON));
-
         iLanguageMajorVersion = iLangMajorVersion;
 
-        logModuleInfo();
     }
 
-    // ----- org.argouml.application.api.NotationProvider ----------------------
 
-    /**
-     * Generates extension point
-     *
-     * @param modelElement Model element to generate notation for.
-     *
-     * @return Generated notation for model element.
-     */
-    public String generateExtensionPoint(Object modelElement) {
-        // TODO: Auto-generated method stub
-        LOG.debug("generateExtensionPoint(MExtensionPoint modelElement)");
-
-        if (!Model.getFacade().isAExtensionPoint(modelElement)) {
-            throw new ClassCastException(modelElement.getClass()
-                    + " has wrong object type, ExtensionPoint required");
-        }
-
-        return "generateExtensionPoint(MExtensionPoint modelElement)";
-    }
-
-    /**
-     * @see org.argouml.notation.NotationProvider2#generateSubmachine(java.lang.Object)
-     */
-    public String generateSubmachine(Object m) {
+    private String generateSubmachine(Object m) {
         Object c = Model.getFacade().getSubmachine(m);
         if (c == null) {
             return "include / ";
@@ -161,21 +106,11 @@ public class GeneratorPHP4
         if (Model.getFacade().getName(c).length() == 0) {
             return "include / ";
         }
-        return ("include / " + generateName(Model.getFacade().getName(c)));
+        return ("include / " + Model.getFacade().getName(c));
     }
 
-    /**
-     * @see org.argouml.notation.NotationProvider2#generateObjectFlowState(java.lang.Object)
-     */
-    public String generateObjectFlowState(Object m) {
-        Object c = Model.getFacade().getType(m);
-        if (c == null) {
-            return "";
-        }
-        return Model.getFacade().getName(c);
-    }
 
-    /**
+    /*
      * Generates operation
      *
      * @param modelElement Model element to generate notation for.
@@ -183,7 +118,7 @@ public class GeneratorPHP4
      *
      * @return Generated notation for model element.
      */
-    public String generateOperation(Object modelElement, boolean bAddDocs) {
+    private String generateOperation(Object modelElement, boolean bAddDocs) {
         if (!Model.getFacade().isAOperation(modelElement)) {
             throw new ClassCastException(modelElement.getClass()
                     + " has wrong object type, Operation required");
@@ -206,7 +141,7 @@ public class GeneratorPHP4
         }
 
         String sVisibility =
-            generate(Model.getFacade().getVisibility(modelElement));
+            generateVisibility(Model.getFacade().getVisibility(modelElement));
         if (sVisibility != null && sVisibility != "") {
             sOperation += sVisibility + " ";
         }
@@ -270,7 +205,7 @@ public class GeneratorPHP4
                         bFirst = false;
                     }
 
-                    sOperation += generate(objParameter);
+                    sOperation += generateParameter(objParameter);
                 }
             }
         }
@@ -280,7 +215,7 @@ public class GeneratorPHP4
         return sOperation;
     }
 
-    /**
+    /*
      * Generates attribute
      *
      * @param modelElement Model element to generate notation for.
@@ -288,7 +223,7 @@ public class GeneratorPHP4
      *
      * @return Generated notation for model element.
      */
-    public String generateAttribute(Object modelElement, boolean bAddDocs) {
+    private String generateAttribute(Object modelElement, boolean bAddDocs) {
         if (!Model.getFacade().isAAttribute(modelElement)) {
             throw new ClassCastException(modelElement.getClass()
                     + " has wrong object type, Attribute required");
@@ -311,7 +246,7 @@ public class GeneratorPHP4
         }
 
         String sVisibility = 
-            generate(Model.getFacade().getVisibility(modelElement));
+            generateVisibility(Model.getFacade().getVisibility(modelElement));
         if (sVisibility != null && sVisibility != "") {
             sAttribute += sVisibility + " ";
         }
@@ -335,7 +270,7 @@ public class GeneratorPHP4
         if (exprInitialValue != null) {
             sInitialValue = generateDefaultValue(
                     Model.getFacade().getType(modelElement),
-                    generate(exprInitialValue).trim(), false);
+                    generateExpression(exprInitialValue).trim(), false);
         } else {
             sInitialValue = generateDefaultValue(
                     Model.getFacade().getType(modelElement), null, false);
@@ -349,11 +284,11 @@ public class GeneratorPHP4
             sAttribute += " | ";
             sAttribute += generateDefaultValue(
                 Model.getFacade().getType(modelElement),
-                    generate(exprInitialValue).trim(), false);
+                    generateExpression(exprInitialValue).trim(), false);
             sAttribute += " | ";
             sAttribute += generateDefaultValue(
                 Model.getFacade().getType(modelElement),
-                    generate(exprInitialValue).trim(), true);
+                    generateExpression(exprInitialValue).trim(), true);
             sAttribute += " ]";
         }
 
@@ -362,14 +297,29 @@ public class GeneratorPHP4
         return sAttribute;
     }
 
-    /**
+    private static String generateExpression(Object expr) {
+        if (Model.getFacade().isAExpression(expr))
+            return generateUninterpreted(
+                    (String) Model.getFacade().getBody(expr));
+        else if (Model.getFacade().isAConstraint(expr))
+            return generateExpression(Model.getFacade().getBody(expr));
+        return "";
+    }
+    
+    private static String generateUninterpreted(String un) {
+        if (un == null)
+            return "";
+        return un;
+    }
+    
+    /*
      * Generates parameter
      *
      * @param modelElement Model element to generate notation for.
      *
      * @return Generated notation for model element.
      */
-    public String generateParameter(Object modelElement) {
+    private String generateParameter(Object modelElement) {
         if (!Model.getFacade().isAParameter(modelElement)) {
             throw new ClassCastException(modelElement.getClass()
                     + " has wrong object type, Parameter required");
@@ -384,7 +334,7 @@ public class GeneratorPHP4
             } 
             String sType = convertType(objType);
             if (sType != null && !"".equals(sType.trim())) {
-                    return "return (" + sType + ") $returnValue;";
+                return "return (" + sType + ") $returnValue;";
             } 
             return "return $returnValue;";
         }
@@ -419,7 +369,7 @@ public class GeneratorPHP4
         sParameter += "$" + Model.getFacade().getName(modelElement);
         
         String sDefaultValue =
-                generate(Model.getFacade().getDefaultValue(modelElement));
+            generateExpression(Model.getFacade().getDefaultValue(modelElement));
         if (sDefaultValue != null && sDefaultValue.length() > 0) {
             sParameter += " = " + sDefaultValue;
         } else {
@@ -454,7 +404,7 @@ public class GeneratorPHP4
         return sParameter;
     }
 
-    /**
+    /*
      * Generates package
      *
      * @param modelElement Model element to generate notation for.
@@ -463,7 +413,7 @@ public class GeneratorPHP4
      *
      * TODO: fix org.argouml.model.Facade#getType
      */
-    public String generatePackage(Object modelElement) {
+    private String generatePackage(Object modelElement) {
         String sPackage = "";
 
         if (!Model.getFacade().isAPackage(modelElement)) {
@@ -494,14 +444,15 @@ public class GeneratorPHP4
                 while (itElements.hasNext()) {
                     Object objElement = itElements.next();
                     if (Model.getFacade().isAPackage(objElement)) {
-                        sPackage += generate(objElement) + "\n";
+                        sPackage += generatePackage(objElement) + "\n";
                     } else if (Model.getFacade().isAClassifier(objElement)) {
-                        sPackage += generate(objElement) + "\n";
+                        sPackage += generateClassifier(objElement) + "\n";
                     } else {
                         sPackage += "/*\n";
                         sPackage += "feature not supported by PHP:\n";
                         sPackage += "-----------------------------\n";
-                        sPackage += generate(objElement) + "\n";
+                        sPackage += Model.getFacade().getName(objElement);
+                        sPackage += " [" + objElement + "]\n";
                         sPackage += "*/\n";
                     }
                     if (itElements.hasNext()) {
@@ -518,14 +469,14 @@ public class GeneratorPHP4
         return sPackage;
     }
 
-    /**
+    /*
      * Generates class or interface
      *
      * @param modelElement Model element to generate notation for.
      *
      * @return Generated notation for model element.
      */
-    public String generateClassifier(Object modelElement) {
+    private String generateClassifier(Object modelElement) {
         if (!Model.getFacade().isAClassifier(modelElement)) {
             throw new ClassCastException(modelElement.getClass()
                     + " has wrong object type, Classifier required");
@@ -591,33 +542,14 @@ public class GeneratorPHP4
         return sClassifier;
     }
 
-    /**
-     * Generates tagged value
-     *
-     * @param modelElement Model element to generate notation for.
-     *
-     * @return Generated notation for model element.
-     */
-    public String generateTaggedValue(Object modelElement) {
-        // TODO: Auto-generated method stub
-        LOG.debug("generateTaggedValue(MTaggedValue modelElement)");
-
-        if (!Model.getFacade().isATaggedValue(modelElement)) {
-            throw new ClassCastException(modelElement.getClass()
-                    + " has wrong object type, TaggedValue required");
-        }
-
-        return "generateTaggedValue(MTaggedValue modelElement)";
-    }
-
-    /**
+    /*
      * Generates association
      *
      * @param modelElement Model element to generate notation for.
      *
      * @return Generated notation for model element.
      */
-    public String generateAssociation(Object modelElement) {
+    private String generateAssociation(Object modelElement) {
         // TODO: Auto-generated method stub
         LOG.debug("generateExtensionPoint(MExtensionPoint modelElement)");
 
@@ -629,14 +561,14 @@ public class GeneratorPHP4
         return "generateAssociation(MAssociation modelElement)";
     }
 
-    /**
+    /*
      * Generates association end
      *
      * @param modelElement Model element to generate notation for.
      *
      * @return Generated notation for model element.
      */
-    public String generateAssociationEnd(Object modelElement) {
+    private String generateAssociationEnd(Object modelElement) {
         // TODO: Auto-generated method stub
         LOG.debug("generateAssociationEnd(MAssociationEnd modelElement)");
 
@@ -648,14 +580,14 @@ public class GeneratorPHP4
         return "generateAssociationEnd(MAssociationEnd modelElement)";
     }
 
-    /**
+    /*
      * Generates multiplicity
      *
      * @param modelElement Model element to generate notation for.
      *
      * @return Generated notation for model element.
      */
-    public String generateMultiplicity(Object modelElement) {
+    private String generateMultiplicity(Object modelElement) {
         // TODO: Auto-generated method stub
         LOG.debug("generateMultiplicity(Multiplicity modelElement)");
 
@@ -667,109 +599,14 @@ public class GeneratorPHP4
         return "generateMultiplicity(Multiplicity modelElement)";
     }
 
-    /**
-     * Generates state
-     *
-     * @param modelElement Model element to generate notation for.
-     *
-     * @return Generated notation for model element.
-     */
-    public String generateState(Object modelElement) {
-        // TODO: Auto-generated method stub
-        LOG.debug("generateState(MState modelElement)");
-
-        if (!Model.getFacade().isAState(modelElement)) {
-            throw new ClassCastException(modelElement.getClass()
-                    + " has wrong object type, State required");
-        }
-
-        return "generateState(MState modelElement)";
-    }
-
-    /**
-     * Generates transition
-     *
-     * @param modelElement Model element to generate notation for.
-     *
-     * @return Generated notation for model element.
-     */
-    public String generateTransition(Object modelElement) {
-        // TODO: Auto-generated method stub
-        LOG.debug("generateTransition(MTransition modelElement)");
-
-        if (!Model.getFacade().isATransition(modelElement)) {
-            throw new ClassCastException(modelElement.getClass()
-                    + " has wrong object type, Transition required");
-        }
-
-        return "generateTransition(MTransition modelElement)";
-    }
-
-    /**
-     * Generates action
-     *
-     * @param modelElement Model element to generate notation for.
-     *
-     * @return Generated notation for model element.
-     */
-    public String generateAction(Object modelElement) {
-        // TODO: Auto-generated method stub
-        LOG.debug("generateAction(Object modelElement)");
-
-        if (!Model.getFacade().isAAction(modelElement)) {
-            throw new ClassCastException(modelElement.getClass()
-                    + " has wrong object type, Action required");
-        }
-
-        return "generateAction(Object modelElement)";
-    }
-
-    /**
-     * Generates guard
-     *
-     * @param modelElement Model element to generate notation for.
-     *
-     * @return Generated notation for model element.
-     */
-    public String generateGuard(Object modelElement) {
-        // TODO: Auto-generated method stub
-        LOG.debug("generateGuard(MGuard modelElement)");
-
-        if (!Model.getFacade().isAGuard(modelElement)) {
-            throw new ClassCastException(modelElement.getClass()
-                    + " has wrong object type, Guard required");
-        }
-
-        return "generateGuard(MGuard modelElement)";
-    }
-
-    /**
-     * Generates message
-     *
-     * @param modelElement Model element to generate notation for.
-     *
-     * @return Generated notation for model element.
-     */
-    public String generateMessage(Object modelElement) {
-        // TODO: Auto-generated method stub
-        LOG.debug("generateMessage(MMessage modelElement)");
-
-        if (!Model.getFacade().isAMessage(modelElement)) {
-            throw new ClassCastException(modelElement.getClass()
-                    + " has wrong object type, Message required");
-        }
-
-        return "generateMessage(MMessage modelElement)";
-    }
-
-    /**
+    /*
      * Generates visibility
      *
      * @param modelElement Model element to generate notation for.
      *
      * @return Generated notation for model element.
      */
-    public String generateVisibility(Object modelElement) {
+    private String generateVisibility(Object modelElement) {
         if (!Model.getFacade().isAVisibilityKind(modelElement)) {
             throw new ClassCastException(modelElement.getClass()
                     + " has wrong object type, VisibilityKind required");
@@ -790,44 +627,9 @@ public class GeneratorPHP4
         return "";
     }
 
-    /**
-     * Generates the String representation for an Event.
-     *
-     * @param modelElement Model element to generate notation for.
-     *
-     * @return Generated notation for model element.
-     */
-    public String generateEvent(Object modelElement) {
-        if (!Model.getFacade().isAEvent(modelElement)) {
-            throw new ClassCastException(modelElement.getClass()
-                    + " has wrong object type, Event required");
-        }
 
-        return "";
-    }
-
-    // --- org.argouml.uml.generator.FileGenerator -----------------------------
-
-    /**
-     * Generates file
-     *
-     * @param modelElement Model element to generate notation for.
-     * @param sPath        output base directory
-     *
-     * @deprecated style break, see issue 2570
-     *
-     * @return name of generated file on success;
-     *         <code>null</code> otherwise.
-     *
-     * @see org.argouml.uml.generator.FileGenerator#generateFile2(
-     * java.lang.Object, java.lang.String)
-     */
-    public String generateFile2(Object modelElement, String sPath) {
-        return generateFile(modelElement, sPath);
-    }
-
-    /**
-     * Generates file
+    /*
+     * Generate the file.
      *
      * @param modelElement Model element to generate notation for.
      * @param sPath        output base directory
@@ -835,7 +637,7 @@ public class GeneratorPHP4
      * @return name of generated file on success;
      *         <code>null</code> otherwise.
      */
-    public String generateFile(Object modelElement, String sPath) {
+    private String generateFile(Object modelElement, String sPath) {
         if (!Model.getFacade().isAClassifier(modelElement)) {
             throw new ClassCastException(modelElement.getClass()
                     + " has wrong object type, Classifier required");
@@ -852,7 +654,7 @@ public class GeneratorPHP4
 
         File f = new File(sFilename);
         if (f.exists()) {
-            LOG.info(getModuleName() + " updates " + f.getPath());
+            LOG.info(getName() + " updates " + f.getPath());
             try {
                 updateFile(modelElement, f);
             } catch (Exception exp) {
@@ -867,12 +669,12 @@ public class GeneratorPHP4
             return sFilename;
         }
 
-        LOG.info(getModuleName() + " creates " + f.getPath());
+        LOG.info(getName() + " creates " + f.getPath());
 
         File fPath = new File(sPath);
         if (!fPath.isDirectory()) {
             if (!fPath.mkdirs()) {
-                LOG.error(getModuleName() + " could not make directory "
+                LOG.error(getName() + " could not make directory "
                         + sPath);
                 return null;
             }
@@ -888,192 +690,12 @@ public class GeneratorPHP4
         return null;
     }
 
-    // ----- org.argouml.application.api.ArgoModule ----------------------------
-
-    /**
-     * Gets name of this module
-     *
-     * @return name of this module
-     */
-    public final String getModuleName() {
-        return "Generator" + LANGUAGE_NAME.toUpperCase()
-                + iLanguageMajorVersion;
+    private  String getName() {
+        return "PHP" + iLanguageMajorVersion;
     }
-
-    /**
-     * Gets description of this module
-     *
-     * @return description of this module
-     */
-    public final String getModuleDescription() {
-        return "notation and source code generator for "
-                + LANGUAGE_NAME.toUpperCase() + iLanguageMajorVersion;
-    }
-
-    /**
-     * Get version of this module.
-     * We use the CVS revision so that we get nominal updating.
-     * @return current version of this module
-     */
-    public String getModuleVersion() {
-        return "0.0.$Revision$";
-    }
-
-    /**
-     * Gets author(s) of this module
-     *
-     * @return name of author(s) of this module
-     */
-    public final String getModuleAuthor() {
-        return "Kai Schr\u00F6der";
-    }
-
-    /**
-     * Gets key of this module
-     *
-     * @return key string to identify this module
-     */
-    public final String getModuleKey() {
-        return "org.argouml.language." + LANGUAGE_NAME.toLowerCase()
-                + iLanguageMajorVersion + ".generator";
-    }
-
-    // ----- org.argouml.application.api.NotationProvider ----------------------
-
-    /**
-     * Generates state body
-     *
-     * @param modelElement Model element to generate notation for.
-     *
-     * @return Generated notation for model element.
-     */
-    public String generateStateBody(Object modelElement) {
-        // TODO: Auto-generated method stub
-        LOG.debug("generateStateBody(MState modelElement)");
-
-        if (!Model.getFacade().isAState(modelElement)) {
-            throw new ClassCastException(modelElement.getClass()
-                    + " has wrong object type, State required");
-        }
-
-        return "generateStateBody(MState modelElement)";
-    }
-
-    /**
-     * Generates association role
-     *
-     * @param modelElement Model element to generate notation for.
-     *
-     * @return Generated notation for model element.
-     */
-    public String generateAssociationRole(Object modelElement) {
-        // TODO: Auto-generated method stub
-        LOG.debug("generateAssociationRole(MAssociationRole modelElement)");
-
-        if (!Model.getFacade().isAAssociationRole(modelElement)) {
-            throw new ClassCastException(modelElement.getClass()
-                    + " has wrong object type, AssociationRole required");
-        }
-
-        return "generateAssociationRole(MAssociationRole modelElement)";
-    }
-
-    /**
-     * Can this module parse given object?
-     *
-     * @param obj object to parse
-     *
-     * @return <code>false</code>
-     */
-    public boolean canParse(Object obj) {
-        // TODO: Auto-generated method stub
-        return false;
-    }
-
-    /**
-     * Can this module parse in general?
-     *
-     * @return <code>false</code>
-     */
-    public boolean canParse() {
-        // TODO: Auto-generated method stub
-        return false;
-    }
+    
 
     // -------------------------------------------------------------------------
-
-    /**
-     * Logs module info block to logger
-     */
-    protected final void logModuleInfo() {
-        logModuleInfo(0);
-    }
-
-    /**
-     * Logs module info block to logger
-     *
-     * @param iMinWidth Minimum block width.
-     */
-    protected final void logModuleInfo(int iMinWidth) {
-        if (!TM_INFO_BLOCK_LOGGED.containsKey(this.getClass().toString())) {
-            StringBuffer sbHeadLine = new StringBuffer("| Module ");
-            sbHeadLine.append(getModuleName() + " "
-                    + getModuleVersion() + " |");
-
-            StringBuffer sbCopyLine =
-                    new StringBuffer("| Copyright (c) 2004, ");
-            sbCopyLine.append(getModuleAuthor() + " |");
-
-            StringBuffer sbDescLine = new StringBuffer("| ");
-            sbDescLine.append(getModuleDescription() + " |");
-
-            if (sbHeadLine.length() > iMinWidth) {
-                iMinWidth = sbHeadLine.length();
-            }
-            if (sbCopyLine.length() > iMinWidth) {
-                iMinWidth = sbCopyLine.length();
-            }
-            if (sbDescLine.length() > iMinWidth) {
-                iMinWidth = sbDescLine.length();
-            }
-
-            String sRulerLine = "+";
-            for (int i = 1; i <= iMinWidth - 2; i++) {
-                sRulerLine += "-";
-            }
-            sRulerLine += "+";
-
-            String sEmptyLine = "";
-            for (int i = 1; i <= iMinWidth; i++) {
-                sEmptyLine += " ";
-            }
-
-            while (sbHeadLine.length() < iMinWidth) {
-                sbHeadLine.insert(sbHeadLine.length() - 2, " ");
-                if (sbHeadLine.length() < iMinWidth) {
-                    sbHeadLine.insert(2, " ");
-                }
-            }
-            while (sbCopyLine.length() < iMinWidth) {
-                sbCopyLine.insert(sbCopyLine.length() - 2, " ");
-            }
-            while (sbDescLine.length() < iMinWidth) {
-                sbDescLine.insert(sbDescLine.length() - 2, " ");
-            }
-
-            LOG.info(sEmptyLine);
-            LOG.info(sRulerLine);
-            LOG.info(sbHeadLine.toString());
-            LOG.info(sRulerLine);
-            LOG.info(sbCopyLine.toString());
-            LOG.info("| " + sEmptyLine.substring(4) + " |");
-            LOG.info(sbDescLine.toString());
-            LOG.info(sRulerLine);
-            LOG.info(sEmptyLine);
-
-            TM_INFO_BLOCK_LOGGED.put(this.getClass().toString(), "true");
-        }
-    }
 
     /**
      * Converts a type model element to a PHP type
@@ -1133,7 +755,7 @@ public class GeneratorPHP4
         return null;
     }
 
-    /**
+    /*
      * Generates the default value for a type
      *
      * @param modelElement classifier representing a type
@@ -1142,7 +764,7 @@ public class GeneratorPHP4
      *
      * @return default value with explicite cast (if needed)
      */
-    protected final String generateDefaultValue(Object modelElement,
+    private final String generateDefaultValue(Object modelElement,
             String sDefault, boolean bCast) {
         if (modelElement == null) {
             return null;
@@ -1206,7 +828,7 @@ public class GeneratorPHP4
         return "null";
     }
 
-    /**
+    /*
      * Generates section for an operation element
      *
      * @param modelElement The model element to generate the section for.
@@ -1217,7 +839,7 @@ public class GeneratorPHP4
         return generateSection(modelElement, INDENT, null);
     }
 
-    /**
+    /*
      * Generates section
      *
      * @param modelElement The model element to generate the section for.
@@ -1236,7 +858,7 @@ public class GeneratorPHP4
         return Section.generate(uuid, sIndent);
     }
 
-    /**
+    /*
      * Creates new source file.
      *
      * @param modelElement The class or interface.
@@ -1291,7 +913,7 @@ public class GeneratorPHP4
         sOutput += "/* user defined constants */\n";
         sOutput += generateSection(modelElement, "", "constants") + "\n";
 
-        sOutput += generate(modelElement);
+        sOutput += generateClassifier(modelElement);
         sOutput += "\n\n?>";
 
         boolean bReturn = true;
@@ -1324,7 +946,7 @@ public class GeneratorPHP4
         return bReturn;
     }
 
-    /**
+    /*
      * Updates the output file for a model element.
      *
      * @param modelElement The model element to update file for.
@@ -1375,7 +997,7 @@ public class GeneratorPHP4
         }
     }
 
-    /**
+    /*
      * Generates classifier attributes
      *
      * @param modelElement classifier
@@ -1415,7 +1037,7 @@ public class GeneratorPHP4
                         }
                     }
 
-                    sClsAttr += INDENT + generate(attr) + "\n";
+                    sClsAttr += INDENT + generateAttribute(attr, false) + "\n";
                 }
             }
 
@@ -1425,7 +1047,7 @@ public class GeneratorPHP4
         return sClsAttr;
     }
 
-    /**
+    /*
      * Generates classifier generalisations
      *
      * @param modelElement classifier
@@ -1475,7 +1097,7 @@ public class GeneratorPHP4
         return sClsGen;
     }
 
-    /**
+    /*
      * Generates classifier operations
      *
      * @param modelElement classifier
@@ -1558,7 +1180,7 @@ public class GeneratorPHP4
                                 }
                             }
 
-                            sClsOp += INDENT + generate(op);
+                            sClsOp += INDENT + generateOperation(op, false);
                             sClsOp += generateMethodBody(op, true);
                         }
                     }
@@ -1586,7 +1208,7 @@ public class GeneratorPHP4
                     }
                 }
 
-                sClsOp += INDENT + generate(op);
+                sClsOp += INDENT + generateOperation(op, false);
 
                 if (Model.getFacade().isAClass(modelElement)) {
                     sClsOp += generateMethodBody(op, false);
@@ -1606,7 +1228,7 @@ public class GeneratorPHP4
         return sClsOp;
     }
 
-    /**
+    /*
      * Generates classifier specifications
      *
      * @param modelElement The model element to generate specifications for.
@@ -1660,7 +1282,7 @@ public class GeneratorPHP4
         return sClsSpec;
     }
 
-    /**
+    /*
      * Generates single require_once statement for class or interface
      *
      * @param modelElement The required class or interface.
@@ -1704,7 +1326,7 @@ public class GeneratorPHP4
         return sRequired;
     }
 
-    /**
+    /*
      * Generates method body for an operation element
      *
      * @param modelElement    Model element to generate body notation for.
@@ -1713,7 +1335,7 @@ public class GeneratorPHP4
      *
      * @return Generated body notation for model element.
      *
-     * TODO: add documentation
+     * TODO: add documentation to generated source
      */
     private String generateMethodBody(Object modelElement,
                                       boolean bIgnoreAbstract) {
@@ -1737,7 +1359,7 @@ public class GeneratorPHP4
                         String sReturnInit = generateDefaultValue(
                             Model.getFacade().getType(objParameter), 
                             null, true);
-                        String sReturnValue = generate(objParameter);
+                        String sReturnValue = generateParameter(objParameter);
 
                         if (sReturnInit != null && sReturnValue.trim() != "") {
                             sMethodBody += INDENT + INDENT + "$returnValue = "
@@ -1771,7 +1393,7 @@ public class GeneratorPHP4
         return sMethodBody;
     }
 
-    /**
+    /*
      * Generates all required_once statements for the class header
      *
      * @param modelElement the class
@@ -1816,7 +1438,7 @@ public class GeneratorPHP4
                     return 0;
                 }
             }
-            );
+        );
 
         /* generalisations */
         Collection colGens = Model.getFacade().getGeneralizations(modelElement);
@@ -1891,18 +1513,58 @@ public class GeneratorPHP4
         return null;
     }
 
-    /**
-     * @see org.argouml.notation.NotationProvider2#generateActionState(java.lang.Object)
+    /*
+     * @see org.argouml.uml.generator.CodeGenerator#generate(java.util.Collection, boolean)
      */
-    public String generateActionState(Object actionState) {
-        String ret = "";
-        Object action = Model.getFacade().getEntry(actionState);
-        if (action != null) {
-            Object expression = Model.getFacade().getScript(action);
-            if (expression != null) {
-                ret = generateExpression(expression);
+    public Collection generate(Collection elements, boolean deps) {
+        LOG.debug("generate() called");
+        File tmpdir = null;
+        try {
+            tmpdir = TempFileUtils.createTempDir();
+            if (tmpdir != null) {
+                generateFiles(elements, tmpdir.getPath(), deps);
+                return TempFileUtils.readAllFiles(tmpdir);
+            }
+            return Collections.EMPTY_LIST;
+        } finally {
+            if (tmpdir != null) {
+                TempFileUtils.deleteDir(tmpdir);
+            }
+            LOG.debug("generate() terminated");
+        }
+    }
+
+    /*
+     * @see org.argouml.uml.generator.CodeGenerator#generateFiles(java.util.Collection, java.lang.String, boolean)
+     */
+    public Collection generateFiles(Collection elements, String path,
+            boolean deps) {
+        LOG.debug("generateFiles() called");
+        // TODO: 'deps' is ignored here
+        for (Iterator it = elements.iterator(); it.hasNext();) {
+            generateFile(it.next(), path);
+        }
+        return TempFileUtils.readFileNames(new File(path));
+    }
+
+    /*
+     * @see org.argouml.uml.generator.CodeGenerator#generateFileList(java.util.Collection, boolean)
+     */
+    public Collection generateFileList(Collection elements, boolean deps) {
+        LOG.debug("generateFileList() called");
+        // TODO: 'deps' is ignored here
+        File tmpdir = null;
+        try {
+            tmpdir = TempFileUtils.createTempDir();
+            for (Iterator it = elements.iterator(); it.hasNext();) {
+                generateFile(it.next(), tmpdir.getName());
+            }
+            return TempFileUtils.readFileNames(tmpdir);
+        } finally {
+            if (tmpdir != null) {
+                TempFileUtils.deleteDir(tmpdir);
             }
         }
-        return ret;
     }
+
 }

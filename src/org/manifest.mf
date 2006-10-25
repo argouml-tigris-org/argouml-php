@@ -2,7 +2,7 @@ Manifest-Version: 2.0
 Class-Path: argouml.jar
 Created-By: 1.3.1 (Sun Microsystems Inc.)
 
-Name: org/argouml/language/php/generator/GeneratorPHP4.class
+Name: org/argouml/language/php/generator/ModulePHP4.class
 Extension-name: module.language.generator.php4
 Specification-Title: ArgoUML Dynamic Load Module
 Specification-Version: 0.9.9
@@ -11,7 +11,7 @@ Implementation-Vendor: Kai Schr�der
 Implementation-Version: 0.0.1
 Implementation-Title: ArgoUML PHP4 code generator plugin
 
-Name: org/argouml/language/php/generator/GeneratorPHP5.class
+Name: org/argouml/language/php/generator/ModulePHP5.class
 Extension-name: module.language.generator.php5
 Specification-Title: ArgoUML Dynamic Load Module
 Specification-Version: 0.9.9
