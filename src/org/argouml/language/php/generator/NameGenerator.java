@@ -55,7 +55,9 @@ public final class NameGenerator {
      *
      * @return The generated name for the given model element.
      *
-     * TODO: fix org.argouml.model.Facade#getName
+     * TODO: fix org.argouml.model.Facade#getName (this todo appears to
+     * date from the original code contributed by Kai Schroeder on 20040323,
+     * but it's unclear to me what needs fixing - tfm - 20070126)
      */
     protected static final String generate(Object modelElement,
         int iMajorVersion) {
@@ -73,6 +75,8 @@ public final class NameGenerator {
             try {
                 sModelElementName = Model.getFacade().getName(modelElement);
             } catch (IllegalArgumentException exp) {
+                // TODO: This should only throw an exception if the object
+                // is not a ModelElement.  Check for this first?- tfm 20070126
                 LOG.error("org.argouml.model.Facade#getName"
                         + " needs already a fix");
             }
@@ -245,6 +249,9 @@ public final class NameGenerator {
      * @param iMajorVersion PHP major version to generate name for.
      *
      * @return The generated filename.
+     * 
+     * TODO: Make this configurable to allow additional filenaming patterns,
+     * including MyClass.php, MyClass.class.php, and my_class.php. 
      */
     protected static final String generateFilename(Object modelElement,
         String sPath, int iMajorVersion) {
