@@ -1,5 +1,5 @@
 // $Id$
-// Copyright (c) 2004-2006 The Regents of the University of California. All
+// Copyright (c) 2004-2007 The Regents of the University of California. All
 // Rights Reserved. Permission to use, copy, modify, and distribute this
 // software and its documentation without fee, and without a written
 // agreement is hereby granted, provided that the above copyright notice
@@ -35,7 +35,7 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
-import org.argouml.application.ArgoVersion;
+import org.argouml.application.helpers.ApplicationVersion;
 import org.argouml.language.php.PHPDocumentor;
 import org.argouml.model.Model;
 import org.argouml.uml.UUIDHelper;
@@ -1142,7 +1142,7 @@ public class GeneratorPHP4 implements CodeGenerator {
                     sClsOp += INDENT + " * @return void\n";
                     sClsOp += INDENT + " *\n";
                     sClsOp += INDENT + " * @author ArgoUML "
-                            + ArgoVersion.getVersion() + "\n";
+                            + ApplicationVersion.getVersion() + "\n";
                     sClsOp += INDENT + " */\n";
 
                     sClsOp += INDENT + sConstructor + "()\n";

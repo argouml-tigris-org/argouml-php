@@ -1,5 +1,5 @@
 // $Id$
-// Copyright (c) 2004-2006 The Regents of the University of California. All
+// Copyright (c) 2004-2007 The Regents of the University of California. All
 // Rights Reserved. Permission to use, copy, modify, and distribute this
 // software and its documentation without fee, and without a written
 // agreement is hereby granted, provided that the above copyright notice
@@ -34,8 +34,8 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
-import org.argouml.application.ArgoVersion;
 import org.argouml.application.api.Argo;
+import org.argouml.application.helpers.ApplicationVersion;
 import org.argouml.configuration.Configuration;
 import org.argouml.language.php.generator.NameGenerator;
 import org.argouml.model.Model;
@@ -328,7 +328,7 @@ public final class PHPDocumentor {
         }
 
         sDescription += "Automatic generated with ArgoUML "
-                + ArgoVersion.getVersion() + " on " + sDateTime;
+                + ApplicationVersion.getVersion() + " on " + sDateTime;
 
         objDocBlock.setDescription(sDescription);
 
