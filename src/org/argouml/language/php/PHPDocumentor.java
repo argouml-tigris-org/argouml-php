@@ -36,7 +36,7 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 import org.argouml.application.ArgoVersion;
 import org.argouml.application.api.Argo;
-import org.argouml.application.configuration.Configuration;
+import org.argouml.configuration.Configuration;
 import org.argouml.language.php.generator.NameGenerator;
 import org.argouml.model.Model;
 
