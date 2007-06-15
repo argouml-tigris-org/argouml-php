@@ -323,7 +323,8 @@ public class GeneratorPHP4 implements CodeGenerator {
 
         if (Model.getFacade().isReturn(modelElement)) {
             Object objType = Model.getFacade().getType(modelElement);
-            if (Model.getFacade().getName(objType).equals("void")) {
+            if (objType == null 
+                    || Model.getFacade().getName(objType).equals("void")) {
                 return "";
             } 
             String sType = convertType(objType);
@@ -672,13 +673,16 @@ public class GeneratorPHP4 implements CodeGenerator {
             }
         }
 
-        if (createFile(modelElement, f)) {
-            LOG.debug("Creating " + f.getPath() + " successfull");
-
-            return sFilename;
-        } 
+        try {
+            if (createFile(modelElement, f)) {
+                LOG.debug("Creating " + f.getPath() + " successfull");
+                return sFilename;
+            }
+        } catch (Exception e) {
+            LOG.error("Creating " + f.getPath() + " failed", e);
+            return null;
+        }
         LOG.error("Creating " + f.getPath() + " failed");
-        
         return null;
     }
 
@@ -1432,58 +1436,37 @@ public class GeneratorPHP4 implements CodeGenerator {
             }
         );
 
-        /* generalisations */
-        Collection colGens = Model.getFacade().getGeneralizations(modelElement);
-        if (colGens != null) {
-            Iterator itGens = colGens.iterator();
-            while (itGens.hasNext()) {
-                Object objGen = itGens.next();
-                tsRequired.add(Model.getFacade().getGeneral(objGen));
-            }
+        for (Object generalization : Model.getFacade().getGeneralizations(
+                modelElement)) {
+            tsRequired.add(Model.getFacade().getGeneral(generalization));
         }
 
-        /* association ends */
-        Collection colAssocEnds = 
-            Model.getFacade().getAssociationEnds(modelElement);
-        if (colAssocEnds != null) {
-            for (Object assocEnd : colAssocEnds) {
-                Collection otherEnds = 
-                    Model.getFacade().getOtherAssociationEnds(assocEnd);
-                if (otherEnds.size() == 1) { // can't handly n-ary associations
-                    Object oppositeEnd = otherEnds.iterator().next();
-                    if (Model.getFacade().isNavigable(oppositeEnd)) {
-                        tsRequired.add(Model.getFacade().getType(oppositeEnd));
-                    }
+        for (Object assocEnd : Model.getFacade().getAssociationEnds(
+                modelElement)) {
+            Collection otherEnds = Model.getFacade().getOtherAssociationEnds(
+                    assocEnd);
+            if (otherEnds.size() == 1) { // can't handly n-ary associations
+                Object oppositeEnd = otherEnds.iterator().next();
+                if (Model.getFacade().isNavigable(oppositeEnd)) {
+                    tsRequired.add(Model.getFacade().getType(oppositeEnd));
                 }
             }
         }
-
-        /* client dependencies */
-        Collection colClientDeps =
-                Model.getFacade().getClientDependencies(modelElement);
-        if (colClientDeps != null) {
-            Iterator itClientDeps = colClientDeps.iterator();
-            while (itClientDeps.hasNext()) {
-                Object dep = itClientDeps.next();
-                Collection colDepSuppliers = 
-                    Model.getFacade().getSuppliers(dep);
-                Iterator itDepSuppliers = colDepSuppliers.iterator();
-                while (itDepSuppliers.hasNext()) {
-                    tsRequired.add(itDepSuppliers.next());
-                }
+        
+        for (Object dep : Model.getFacade().getClientDependencies(modelElement)) {
+            for (Object supplier : Model.getFacade().getSuppliers(dep)) {
+                tsRequired.add(supplier);
             }
         }
+        
 
-        Iterator itRequired = tsRequired.iterator();
-        if (itRequired != null) {
-            while (itRequired.hasNext()) {
-                Object objRequired = itRequired.next();
-                if (!objRequired.equals(modelElement)) {
-                    sRequired += generateRequireOnceStatement(objRequired,
-                            true) + "\n";
-                }
+        for (Object objRequired : tsRequired) {
+            if (!objRequired.equals(modelElement)) {
+                sRequired += generateRequireOnceStatement(objRequired, true)
+                        + "\n";
             }
         }
+        
 
         return sRequired;
     }
