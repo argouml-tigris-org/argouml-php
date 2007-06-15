@@ -1,5 +1,5 @@
 // $Id$
-// Copyright (c) 2004-2006 The Regents of the University of California. All
+// Copyright (c) 2004-2007 The Regents of the University of California. All
 // Rights Reserved. Permission to use, copy, modify, and distribute this
 // software and its documentation without fee, and without a written
 // agreement is hereby granted, provided that the above copyright notice
@@ -146,18 +146,12 @@ public class GeneratorPHP4 implements CodeGenerator {
         }
 
         if (iLanguageMajorVersion > 4) {
-            /* scope */
-            Object ownerScope = Model.getFacade().getOwnerScope(modelElement);
-            if (Model.getScopeKind().getClassifier().equals(ownerScope)) {
+            if (Model.getFacade().isStatic(modelElement)) {
                 sOperation += "static ";
             }
-
-            /* changeability */
             if (Model.getFacade().isLeaf(modelElement)) {
                 sOperation += "final ";
             }
-
-            /* abstractness */
             if (Model.getFacade().isAbstract(modelElement)) {
                 sOperation += "abstract ";
             }
@@ -193,10 +187,8 @@ public class GeneratorPHP4 implements CodeGenerator {
         Collection colParameters = 
             Model.getFacade().getParameters(modelElement);
         if (colParameters != null) {
-            Iterator itParameters = colParameters.iterator();
             boolean bFirst = true;
-            while (itParameters.hasNext()) {
-                Object objParameter = itParameters.next();
+            for (Object objParameter : colParameters) {
                 if (!Model.getFacade().isReturn(objParameter)) {
                     if (!bFirst) {
                         sOperation += ", ";
@@ -244,23 +236,26 @@ public class GeneratorPHP4 implements CodeGenerator {
             }
         }
 
-        String sVisibility = 
-            generateVisibility(Model.getFacade().getVisibility(modelElement));
-        if (sVisibility != null && sVisibility != "") {
-            sAttribute += sVisibility + " ";
-        }
-
-        if (iLanguageMajorVersion > 4) {
-            /* scope */
-            Object ownerScope = Model.getFacade().getOwnerScope(modelElement);
-            if (Model.getScopeKind().getClassifier().equals(ownerScope)) {
-                sAttribute += "static ";
-            }
+        if (Model.getFacade().isReadOnly(modelElement)) {
+            sAttribute += "const ";
         } else {
-            sAttribute += "var ";
-        }
+            String sVisibility = generateVisibility(Model.getFacade()
+                    .getVisibility(modelElement));
+            if (sVisibility != null && sVisibility != "") {
+                sAttribute += sVisibility + " ";
+            }
 
-        sAttribute += "$" + NameGenerator.generate(modelElement,
+            if (iLanguageMajorVersion > 4) {
+                if (Model.getFacade().isStatic(modelElement)) {
+                    sAttribute += "static ";
+                }
+            } else {
+                sAttribute += "var ";
+            }
+            sAttribute += "$";
+        }
+        
+        sAttribute += NameGenerator.generate(modelElement,
                 iLanguageMajorVersion);
 
         String sInitialValue = null;
@@ -378,9 +373,7 @@ public class GeneratorPHP4 implements CodeGenerator {
                 Model.getFacade().getParameters(Model.getFacade()
                                         .getBehavioralFeature(modelElement));
             if (colParameters != null) {
-                Iterator itParameters = colParameters.iterator();
-                while (itParameters.hasNext()) {
-                    Object objParameter = itParameters.next();
+                for (Object objParameter : colParameters) {
                     if (!Model.getFacade().isReturn(objParameter)) {
                         if (!modelElement.equals(objParameter)) {
                             if (Model.getFacade()
@@ -557,7 +550,7 @@ public class GeneratorPHP4 implements CodeGenerator {
                     + " has wrong object type, Association required");
         }
 
-        return "generateAssociation(MAssociation modelElement)";
+        return "generateAssociation(Association modelElement)";
     }
 
     /*
@@ -576,7 +569,7 @@ public class GeneratorPHP4 implements CodeGenerator {
                     + " has wrong object type, AssociationEnd required");
         }
 
-        return "generateAssociationEnd(MAssociationEnd modelElement)";
+        return "generateAssociationEnd(AssociationEnd modelElement)";
     }
 
     /*
@@ -1075,7 +1068,7 @@ public class GeneratorPHP4 implements CodeGenerator {
                 }
 
                 while (itGen.hasNext()) {
-                    Object elmGen = Model.getFacade().getParent(itGen.next());
+                    Object elmGen = Model.getFacade().getGeneral(itGen.next());
                     if (elmGen != null) {
                         sClsGen += NameGenerator.generate(elmGen,
                                 iLanguageMajorVersion);
@@ -1409,8 +1402,8 @@ public class GeneratorPHP4 implements CodeGenerator {
                     + " has wrong object type, Classifier required");
         }
 
-        TreeSet tsRequired = new TreeSet(
-            new Comparator() {
+        TreeSet<Object> tsRequired = new TreeSet<Object>(
+            new Comparator<Object>() {
                 public int compare(Object obj1, Object obj2) {
                     if (obj1 != null) {
                         if (!Model.getFacade().isAClassifier(obj1)) {
@@ -1445,7 +1438,7 @@ public class GeneratorPHP4 implements CodeGenerator {
             Iterator itGens = colGens.iterator();
             while (itGens.hasNext()) {
                 Object objGen = itGens.next();
-                tsRequired.add(Model.getFacade().getParent(objGen));
+                tsRequired.add(Model.getFacade().getGeneral(objGen));
             }
         }
 
@@ -1453,12 +1446,14 @@ public class GeneratorPHP4 implements CodeGenerator {
         Collection colAssocEnds = 
             Model.getFacade().getAssociationEnds(modelElement);
         if (colAssocEnds != null) {
-            Iterator itAssocEnds = colAssocEnds.iterator();
-            while (itAssocEnds.hasNext()) {
-                Object assocEnd = itAssocEnds.next();
-                Object oppositeEnd = Model.getFacade().getOppositeEnd(assocEnd);
-                if (Model.getFacade().isNavigable(oppositeEnd)) {
-                    tsRequired.add(Model.getFacade().getType(oppositeEnd));
+            for (Object assocEnd : colAssocEnds) {
+                Collection otherEnds = 
+                    Model.getFacade().getOtherAssociationEnds(assocEnd);
+                if (otherEnds.size() == 1) { // can't handly n-ary associations
+                    Object oppositeEnd = otherEnds.iterator().next();
+                    if (Model.getFacade().isNavigable(oppositeEnd)) {
+                        tsRequired.add(Model.getFacade().getType(oppositeEnd));
+                    }
                 }
             }
         }
