@@ -1455,8 +1455,29 @@ public class GeneratorPHP4 implements CodeGenerator {
                 tsRequired.add(supplier);
             }
         }
-        
 
+        // TODO: We need includes for types of attributes and operation
+        // parameters, but I'm not sure where they need to go - tfm 
+        // Issue 4095
+//        for (Object attribute : Model.getFacade().getAttributes(
+//                modelElement)) {
+//            Object type = Model.getFacade().getType(attribute);
+//            if (type != null) {
+//                tsRequired.add(type);
+//            }
+//        }
+//
+//        for (Object operation : Model.getFacade().getOperations(
+//                modelElement)) {
+//            for (Object parameter : Model.getFacade().getParameters(
+//                    operation)) {
+//                Object type = Model.getFacade().getType(parameter);
+//                if (type != null) {
+//                    tsRequired.add(type);
+//                }
+//            }
+//        }
+        
         for (Object objRequired : tsRequired) {
             if (!objRequired.equals(modelElement)) {
                 sRequired += generateRequireOnceStatement(objRequired, true)
