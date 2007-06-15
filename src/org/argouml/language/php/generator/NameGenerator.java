@@ -170,7 +170,8 @@ public final class NameGenerator {
         String sName = Model.getFacade().getName(modelElement);
 
         String sPackageName = generatePackageName(modelElement);
-        if (sPackageName != null && sPackageName.length() > 0) {
+        if (sName != null && sPackageName != null 
+                && sPackageName.length() > 0) {
             sName = sPackageName + "_" + sName;
         }
 
