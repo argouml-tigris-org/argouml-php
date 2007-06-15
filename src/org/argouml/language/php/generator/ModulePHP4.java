@@ -64,7 +64,8 @@ public class ModulePHP4 implements ModuleInterface {
     /**
      * Info block already written to log file?
      */
-    protected static final TreeMap TM_INFO_BLOCK_LOGGED = new TreeMap();
+    protected static final TreeMap<String, String> TM_INFO_BLOCK_LOGGED = 
+        new TreeMap<String, String>();
 
     /**
      * Constructor for PHP module.
