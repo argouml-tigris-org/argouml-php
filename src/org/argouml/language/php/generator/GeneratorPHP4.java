@@ -337,10 +337,11 @@ public class GeneratorPHP4 implements CodeGenerator {
                 // TODO: Do we really need this for PHP5?
                 // TODO: Implement this in Model subsystem?
                 /* if OUT or INOUT, then pass by reference */
-            if (Model.getFacade().getKind(modelElement).equals(
-                    Model.getDirectionKind().getInOutParameter())
-                        || Model.getFacade().getKind(modelElement).equals(
-                                Model.getDirectionKind().getOutParameter())) {
+            Object direction = Model.getFacade().getKind(modelElement);
+            if (direction != null
+                    && (direction.equals(Model.getDirectionKind()
+                            .getInOutParameter()) || direction.equals(Model
+                            .getDirectionKind().getOutParameter()))) {
                 sParameter += "&";
             }
         }
@@ -370,9 +371,8 @@ public class GeneratorPHP4 implements CodeGenerator {
         } else {
             boolean bAddDefaultValue = false;
                 
-            Collection colParameters = 
-                Model.getFacade().getParameters(Model.getFacade()
-                                        .getBehavioralFeature(modelElement));
+            Collection colParameters = Model.getFacade().getParameters(
+                    Model.getFacade().getBehavioralFeature(modelElement));
             if (colParameters != null) {
                 for (Object objParameter : colParameters) {
                     if (!Model.getFacade().isReturn(objParameter)) {
@@ -1330,8 +1330,6 @@ public class GeneratorPHP4 implements CodeGenerator {
      *                        abstract methods.
      *
      * @return Generated body notation for model element.
-     *
-     * TODO: add documentation to generated source
      */
     private String generateMethodBody(Object modelElement,
                                       boolean bIgnoreAbstract) {
@@ -1348,10 +1346,8 @@ public class GeneratorPHP4 implements CodeGenerator {
             Collection colParameters = 
                 Model.getFacade().getParameters(modelElement);
             if (colParameters != null) {
-                Iterator itParameters = colParameters.iterator();
-                while (itParameters.hasNext()) {
-                    Object objParameter = itParameters.next();
-                    if (Model.getFacade().isReturn(objParameter)) {
+                for (Object objParameter : colParameters) {
+                      if (Model.getFacade().isReturn(objParameter)) {
                         String sReturnInit = generateDefaultValue(
                             Model.getFacade().getType(objParameter), 
                             null, true);
@@ -1453,7 +1449,8 @@ public class GeneratorPHP4 implements CodeGenerator {
             }
         }
         
-        for (Object dep : Model.getFacade().getClientDependencies(modelElement)) {
+        for (Object dep : Model.getFacade().getClientDependencies(
+                modelElement)) {
             for (Object supplier : Model.getFacade().getSuppliers(dep)) {
                 tsRequired.add(supplier);
             }
