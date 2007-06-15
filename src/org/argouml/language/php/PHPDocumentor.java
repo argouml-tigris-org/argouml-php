@@ -328,7 +328,8 @@ public final class PHPDocumentor {
 
         sDescription +=
                 "Automatically generated on " + sDateTime
-                        + " with ArgoUML PHP module (last revised $Date$)";
+                + " with ArgoUML PHP module \n(last revised " 
+                + "$Date$)";
 
         objDocBlock.setDescription(sDescription);
 
@@ -519,12 +520,24 @@ public final class PHPDocumentor {
                         objDocBlock.setTag(DocBlock.TAG_TYPE_RETURN, "mixed");
                     }
                 } else {
-                    Object objParamType = 
+                    StringBuffer description = new StringBuffer(" ");
+                    Object type = 
                             Model.getFacade().getType(objParameter);
-                    if (objParamType != null) {
-                        objDocBlock.addTag(DocBlock.TAG_TYPE_PARAM,
-                                Model.getFacade().getName(objParamType));
+                    if (type != null) {
+                        description.append(Model.getFacade().getName(type));
                     }
+                    description.append(" ");
+                    String name = Model.getFacade().getName(objParameter);
+                    if (name != null) {
+                        description.append(name);
+                    }
+                    String doc = Model.getFacade().getTaggedValueValue(
+                            objParameter, "documentation");
+                    if (doc != null) {
+                        description.append(" ").append(doc);
+                    }
+                    objDocBlock.addTag(DocBlock.TAG_TYPE_PARAM, 
+                            description.toString());
                 }
             }
         }
@@ -1140,7 +1153,7 @@ public final class PHPDocumentor {
         /**
          * Class constructor
          *
-         * @param sTagName The name of the tag to instanciate.
+         * @param sTagName The name of the tag to instantiate.
          */
         protected Tag(String sTagName) {
             sName = sTagName;
