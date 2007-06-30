@@ -1347,7 +1347,7 @@ public class GeneratorPHP4 implements CodeGenerator {
                 Model.getFacade().getParameters(modelElement);
             if (colParameters != null) {
                 for (Object objParameter : colParameters) {
-                      if (Model.getFacade().isReturn(objParameter)) {
+                    if (Model.getFacade().isReturn(objParameter)) {
                         String sReturnInit = generateDefaultValue(
                             Model.getFacade().getType(objParameter), 
                             null, true);
