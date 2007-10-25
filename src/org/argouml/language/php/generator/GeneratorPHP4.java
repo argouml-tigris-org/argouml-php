@@ -544,7 +544,7 @@ public class GeneratorPHP4 implements CodeGenerator {
      */
     private String generateAssociation(Object modelElement) {
         // TODO: Auto-generated method stub
-        LOG.debug("generateExtensionPoint(MExtensionPoint modelElement)");
+        LOG.debug("generateAssociation(Association modelElement)");
 
         if (!Model.getFacade().isAAssociation(modelElement)) {
             throw new ClassCastException(modelElement.getClass()
@@ -1343,34 +1343,45 @@ public class GeneratorPHP4 implements CodeGenerator {
         if (!Model.getFacade().isAbstract(modelElement) || bIgnoreAbstract) {
             sMethodBody += "\n" + INDENT + "{\n";
 
-            Collection colParameters = 
+            Collection parameters = 
                 Model.getFacade().getParameters(modelElement);
-            if (colParameters != null) {
-                for (Object objParameter : colParameters) {
-                    if (Model.getFacade().isReturn(objParameter)) {
-                        String sReturnInit = generateDefaultValue(
-                            Model.getFacade().getType(objParameter), 
-                            null, true);
-                        String sReturnValue = generateParameter(objParameter);
-
-                        if (sReturnInit != null && sReturnValue.trim() != "") {
-                            sMethodBody += INDENT + INDENT + "$returnValue = "
-                                    + sReturnInit + ";\n\n";
-                        }
-
-                        sMethodBody += generateSection(modelElement);
-
-                        if (sReturnValue != null && sReturnValue != "") {
-                            sMethodBody += "\n" + INDENT + INDENT
-                                    + sReturnValue + "\n";
-                        }
-
-                        sMethodBody += INDENT + "}\n";
-
-                        break;
+            Object returnParameter = null;
+            for (Object parameter : parameters) {
+                if (Model.getFacade().isReturn(parameter)) {
+                    if (returnParameter != null) {
+                        throw new IllegalStateException(
+                                "Found more than 1 return parameter in method "
+                                        + Model.getFacade().getName(
+                                                modelElement));
+                    } else {
+                        returnParameter = parameter;
                     }
-                }
+                }   
             }
+            
+            String returnDefault = null;
+            String returnValue = null;
+            if (returnParameter != null) {
+                returnDefault = generateDefaultValue(
+                        Model.getFacade().getType(returnParameter), 
+                        null, true);
+                returnValue = generateParameter(returnParameter);
+            }
+
+            if (returnDefault != null && returnValue.trim() != "") {
+                sMethodBody += INDENT + INDENT + "$returnValue = "
+                        + returnDefault + ";\n\n";
+            }
+
+            sMethodBody += generateSection(modelElement);
+
+            if (returnValue != null && returnValue != "") {
+                sMethodBody += "\n" + INDENT + INDENT + returnValue + "\n";
+            }
+
+            sMethodBody += INDENT + "}\n";
+
+            
         } else {
             if (iLanguageMajorVersion < 5) {
                 sMethodBody += "\n" + INDENT + "{\n";
