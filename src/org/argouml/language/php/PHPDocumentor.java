@@ -1,5 +1,5 @@
 // $Id$
-// Copyright (c) 2004-2006 The Regents of the University of California. All
+// Copyright (c) 2004-2008 The Regents of the University of California. All
 // Rights Reserved. Permission to use, copy, modify, and distribute this
 // software and its documentation without fee, and without a written
 // agreement is hereby granted, provided that the above copyright notice
@@ -26,7 +26,6 @@ package org.argouml.language.php;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.Map;
@@ -90,12 +89,16 @@ public final class PHPDocumentor {
 
     /**
      * full name of ArgoUML user
+     * TODO: This should probably use the name in the project in
+     * preference to the global user name.
      */
     private static String sArgoUserFullname =
             Configuration.getString(Argo.KEY_USER_FULLNAME);
 
     /**
      * email address of ArgoUML user
+     * TODO: This should probably use the address in the project in preference
+     * to the global email address.
      */
     private static String sArgoUserEmail =
             Configuration.getString(Argo.KEY_USER_EMAIL);
@@ -497,48 +500,42 @@ public final class PHPDocumentor {
             objDocBlock.setTag(DocBlock.TAG_TYPE_ABSTRACT, "true");
         }
 
-        Collection colParameter = Model.getFacade().getParameters(modelElement);
-        if (colParameter != null) {
-            Iterator itParameter = colParameter.iterator();
-            while (itParameter.hasNext()) {
-                Object objParameter = itParameter.next();
-                if (Model.getFacade().isReturn(objParameter)) {
-                    Object objReturnType = 
-                            Model.getFacade().getType(objParameter);
-                    if (objReturnType != null) {
-                        String sPackageName = NameGenerator
-                            .generatePackageName(objReturnType);
-                        if (sPackageName != null && sPackageName != "") {
-                            objDocBlock.setTag(DocBlock.TAG_TYPE_RETURN,
-                                    sPackageName + "_"
-                                    + Model.getFacade().getName(objReturnType));
-                        } else {
-                            objDocBlock.setTag(DocBlock.TAG_TYPE_RETURN,
-                                    Model.getFacade().getName(objReturnType));
-                        }
+        for (Object parameter : Model.getFacade().getParameters(modelElement)) {
+            if (Model.getFacade().isReturn(parameter)) {
+                Object returnType = Model.getFacade().getType(parameter);
+                if (returnType != null) {
+                    String packageName = NameGenerator
+                            .generatePackageName(returnType);
+                    if (packageName != null && packageName != "") {
+                        objDocBlock.setTag(DocBlock.TAG_TYPE_RETURN, 
+                                packageName
+                                + "_"
+                                + Model.getFacade().getName(returnType));
                     } else {
-                        objDocBlock.setTag(DocBlock.TAG_TYPE_RETURN, "mixed");
+                        objDocBlock.setTag(DocBlock.TAG_TYPE_RETURN, Model
+                                .getFacade().getName(returnType));
                     }
                 } else {
-                    StringBuffer description = new StringBuffer(" ");
-                    Object type = 
-                            Model.getFacade().getType(objParameter);
-                    if (type != null) {
-                        description.append(Model.getFacade().getName(type));
-                    }
-                    description.append(" ");
-                    String name = Model.getFacade().getName(objParameter);
-                    if (name != null) {
-                        description.append(name);
-                    }
-                    String doc = Model.getFacade().getTaggedValueValue(
-                            objParameter, "documentation");
-                    if (doc != null) {
-                        description.append(" ").append(doc);
-                    }
-                    objDocBlock.addTag(DocBlock.TAG_TYPE_PARAM, 
-                            description.toString());
+                    objDocBlock.setTag(DocBlock.TAG_TYPE_RETURN, "mixed");
                 }
+            } else {
+                StringBuffer description = new StringBuffer(" ");
+                Object type = Model.getFacade().getType(parameter);
+                if (type != null) {
+                    description.append(Model.getFacade().getName(type));
+                }
+                description.append(" ");
+                String name = Model.getFacade().getName(parameter);
+                if (name != null) {
+                    description.append(name);
+                }
+                String doc = Model.getFacade().getTaggedValueValue(parameter,
+                        "documentation");
+                if (doc != null) {
+                    description.append(" ").append(doc);
+                }
+                objDocBlock.addTag(DocBlock.TAG_TYPE_PARAM, description
+                        .toString());
             }
         }
     }
@@ -682,7 +679,7 @@ public final class PHPDocumentor {
         /**
          * Map of all tags in DocBlock
          */
-        private TreeMap tmTags = new TreeMap();
+        private TreeMap<String, ITag> tmTags = new TreeMap<String, ITag>();
 
         /**
          * Class constructor
@@ -708,7 +705,7 @@ public final class PHPDocumentor {
         /**
          * Formats the DocBlock
          *
-         * @param sIndent line indention string
+         * @param sIndent line indentation string
          *
          * @return The formatted DocBlock.
          */
@@ -723,23 +720,20 @@ public final class PHPDocumentor {
 
             s += wrapDescription(sIndent, 80);
 
-            Iterator itTags = tmTags.entrySet().iterator();
-            while (itTags.hasNext()) {
-                Map.Entry entryMap = (Map.Entry) itTags.next();
-                Object objEntry = entryMap.getValue();
-                if (objEntry instanceof ArrayList) {
-                    ArrayList objArrayList = (ArrayList) objEntry;
-                    for (int i = 0; i < objArrayList.size(); ++i) {
-                        Tag objTag = (Tag) objArrayList.get(i);
-                        if (objTag.getTag() != null) {
-                            s += sIndent + " * " + objTag.getTag() + "\n";
+            for (Map.Entry<String, ITag> entryMap : tmTags.entrySet()) {
+                ITag entryValue = entryMap.getValue();
+                if (entryValue instanceof ParamList) {
+                    ParamList paramList = (ParamList) entryValue;
+                    for (ParamTag tag : paramList ) {
+                        if (tag.getTag() != null) {
+                            s += sIndent + " * " + tag.getTag() + "\n";
                         }
                     }
                 } else {
-                    Tag objTag = (Tag) objEntry;
-                    if (objTag.getContent() != null) {
-                        if (objTag.getTag() != null) {
-                            s += sIndent + " * " + objTag.getTag() + "\n";
+                    Tag tag = (Tag) entryValue;
+                    if (tag.getContent() != null) {
+                        if (tag.getTag() != null) {
+                            s += sIndent + " * " + tag.getTag() + "\n";
                         }
                     }
                 }
@@ -874,7 +868,7 @@ public final class PHPDocumentor {
                 tmTags.put("package", new PackageTag());
                 break;
             case TAG_TYPE_PARAM:
-                tmTags.put("param", new ArrayList());
+                tmTags.put("param", new ParamList());
                 break;
             case TAG_TYPE_RETURN:
                 tmTags.put("return", new ReturnTag());
@@ -1001,7 +995,7 @@ public final class PHPDocumentor {
             switch (iTagType) {
             // TODO: move block 4 spaces right if checkstyle is fixed
             case TAG_TYPE_PARAM:
-                ArrayList alParams = (ArrayList) tmTags.get("param");
+                ParamList alParams = (ParamList) tmTags.get("param");
 
                 if (alParams != null) {
                     ParamTag tagParam = new ParamTag();
@@ -1138,13 +1132,19 @@ public final class PHPDocumentor {
 
     // -------------------------------------------------------------------------
 
+    /*
+     * Marker interface for tags.
+     */
+    private interface ITag {
+    }
+    
     /**
      * This class is the abstract base class for all PHPDocumentor tags.
      *
      * @author  Kai Schr&ouml;der, k.schroeder@php.net
      * @since   ArgoUML 0.15.5
      */
-    private abstract class Tag {
+    private abstract class Tag implements ITag {
         /**
          * name of tag
          */
@@ -1182,6 +1182,7 @@ public final class PHPDocumentor {
         private final String getName() {
             return "@" + this.sName;
         }
+
 
         /**
          * Gets the complete tag.
@@ -1588,6 +1589,11 @@ public final class PHPDocumentor {
         public PackageTag() {
             super("package");
         }
+    }
+    
+    private final class ParamList extends ArrayList<ParamTag> implements ITag {
+
+        
     }
 
     // -------------------------------------------------------------------------

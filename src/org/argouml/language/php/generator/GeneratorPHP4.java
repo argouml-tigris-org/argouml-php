@@ -1,5 +1,5 @@
 // $Id$
-// Copyright (c) 2004-2007 The Regents of the University of California. All
+// Copyright (c) 2004-2008 The Regents of the University of California. All
 // Rights Reserved. Permission to use, copy, modify, and distribute this
 // software and its documentation without fee, and without a written
 // agreement is hereby granted, provided that the above copyright notice
@@ -159,19 +159,12 @@ public class GeneratorPHP4 implements CodeGenerator {
 
         boolean bReturnByReference = false;
 
-        Iterator itTaggedValues =
-            Model.getFacade().getTaggedValues(modelElement);
-        if (itTaggedValues != null) {
-            while (itTaggedValues.hasNext()) {
-                Object objTaggedValue = itTaggedValues.next();
-                if (Model.getFacade().getTagOfTag(objTaggedValue).equals("&")) {
-                    if (Model.getFacade().getValueOfTag(objTaggedValue)
-                            .equals("true")) {
-                        bReturnByReference = true;
-
-                        break;
-                    }
-                }
+        for (Object tv : Model.getFacade().getTaggedValuesCollection(
+                modelElement)) {
+            if ("&".equals(Model.getFacade().getTagOfTag(tv))
+                    && "true".equals(Model.getFacade().getValueOfTag(tv))) {
+                bReturnByReference = true;
+                break;
             }
         }
 
@@ -341,7 +334,7 @@ public class GeneratorPHP4 implements CodeGenerator {
             if (direction != null
                     && (direction.equals(Model.getDirectionKind()
                             .getInOutParameter()) || direction.equals(Model
-                            .getDirectionKind().getOutParameter()))) {
+                                    .getDirectionKind().getOutParameter()))) {
                 sParameter += "&";
             }
         }
@@ -431,30 +424,28 @@ public class GeneratorPHP4 implements CodeGenerator {
 
         Collection colElements = 
             Model.getFacade().getOwnedElements(modelElement);
-        if (colElements != null) {
+        if (colElements.size() == 0) {
+            sPackage += "// this package contains no elements\n";
+        } else {
             Iterator itElements = colElements.iterator();
-            if (itElements != null) {
-                while (itElements.hasNext()) {
-                    Object objElement = itElements.next();
-                    if (Model.getFacade().isAPackage(objElement)) {
-                        sPackage += generatePackage(objElement) + "\n";
-                    } else if (Model.getFacade().isAClassifier(objElement)) {
-                        sPackage += generateClassifier(objElement) + "\n";
-                    } else {
-                        sPackage += "/*\n";
-                        sPackage += "feature not supported by PHP:\n";
-                        sPackage += "-----------------------------\n";
-                        sPackage += Model.getFacade().getName(objElement);
-                        sPackage += " [" + objElement + "]\n";
-                        sPackage += "*/\n";
-                    }
-                    if (itElements.hasNext()) {
-                        sPackage += "\n";
-                    }
+            while (itElements.hasNext()) {
+                Object objElement = itElements.next();
+                if (Model.getFacade().isAPackage(objElement)) {
+                    sPackage += generatePackage(objElement) + "\n";
+                } else if (Model.getFacade().isAClassifier(objElement)) {
+                    sPackage += generateClassifier(objElement) + "\n";
+                } else {
+                    sPackage += "/*\n";
+                    sPackage += "feature not supported by PHP:\n";
+                    sPackage += "-----------------------------\n";
+                    sPackage += Model.getFacade().getName(objElement);
+                    sPackage += " [" + objElement + "]\n";
+                    sPackage += "*/\n";
+                }
+                if (itElements.hasNext()) {
+                    sPackage += "\n";
                 }
             }
-        } else {
-            sPackage += "// this package contains no elements\n";
         }
 
         sPackage += "\n/* end of package " + sPackageName + " */";
@@ -527,6 +518,7 @@ public class GeneratorPHP4 implements CodeGenerator {
 
         sClassifier += "{\n";
 
+        sClassifier += generateClassifierAssociations(modelElement);
         sClassifier += generateClassifierAttributes(modelElement);
         sClassifier += generateClassifierOperations(modelElement);
 
@@ -535,6 +527,43 @@ public class GeneratorPHP4 implements CodeGenerator {
         return sClassifier;
     }
 
+
+    private String generateClassifierAssociations(Object element) {
+        StringBuilder text = new StringBuilder();
+
+        if (Model.getFacade().isAClass(element)) {
+            text.append(INDENT).append("// --- ASSOCIATIONS ---\n");
+
+            for (Object assocEnd : Model.getFacade().getAssociationEnds(
+                    element)) {
+                Object oppositeEnd = getNavigableOppositeEnd(assocEnd);
+                if (oppositeEnd != null) {
+                    text.append(INDENT);
+                    text.append(generateAssociationEnd(oppositeEnd));
+                }
+            }
+        }
+        return text.append("\n\n").toString();
+    }
+    
+    /**
+     * Return the opposite navigable end or null.  If this associationEnd
+     * is a part of a binary association and the opposite end is navigable, 
+     * return that end, otherwise return null.
+     */
+    private Object getNavigableOppositeEnd(Object assEnd) {
+        Collection otherEnds = Model.getFacade().getOtherAssociationEnds(
+                assEnd);
+        Object returnValue = null;
+        if (otherEnds.size() == 1) {
+            Object oppositeEnd = otherEnds.iterator().next();
+            if (Model.getFacade().isNavigable(oppositeEnd)) {
+                returnValue = oppositeEnd;
+            }
+        }
+        return returnValue;
+    }
+    
     /*
      * Generates association
      *
@@ -550,8 +579,14 @@ public class GeneratorPHP4 implements CodeGenerator {
             throw new ClassCastException(modelElement.getClass()
                     + " has wrong object type, Association required");
         }
+        
+       
+        String name = Model.getFacade().getName(modelElement);
+        if (name == null) {
+            name = "";            
+        }
 
-        return "generateAssociation(Association modelElement)";
+        return "// generateAssociation : " + name;
     }
 
     /*
@@ -563,14 +598,34 @@ public class GeneratorPHP4 implements CodeGenerator {
      */
     private String generateAssociationEnd(Object modelElement) {
         // TODO: Auto-generated method stub
-        LOG.debug("generateAssociationEnd(MAssociationEnd modelElement)");
+        LOG.debug("generateAssociationEnd(AssociationEnd modelElement)");
 
         if (!Model.getFacade().isAAssociationEnd(modelElement)) {
             throw new ClassCastException(modelElement.getClass()
                     + " has wrong object type, AssociationEnd required");
         }
 
-        return "generateAssociationEnd(AssociationEnd modelElement)";
+        StringBuffer text = new StringBuffer();        
+        PHPDocumentor objPHPDoc = null;
+        try {
+            objPHPDoc = new PHPDocumentor(modelElement);
+        } catch (Exception exp) {
+            LOG.error("Generating AssociationEnd DocBlock FAILED: "
+                    + exp.getMessage());
+        } finally {
+            if (objPHPDoc != null) {
+                text.append(objPHPDoc.toString());
+            }
+        }
+        
+        ///// TODO: This can be generated in much the same way as an Attribute
+        
+        String name = Model.getFacade().getName(modelElement);
+        if (name == null) {
+            name = "";    
+        }
+
+        return "// generateAssociationEnd : " + name;
     }
 
     /*
@@ -589,7 +644,7 @@ public class GeneratorPHP4 implements CodeGenerator {
                     + " has wrong object type, Multiplicity required");
         }
 
-        return "generateMultiplicity(Multiplicity modelElement)";
+        return "// generateMultiplicity(Multiplicity modelElement)";
     }
 
     /*
@@ -1151,76 +1206,60 @@ public class GeneratorPHP4 implements CodeGenerator {
         }
 
         if (Model.getFacade().isAClass(modelElement)) {
-            Collection colSpec = 
-                Model.getFacade().getSpecifications(modelElement);
-            if (colSpec != null) {
-                Iterator itSpec = colSpec.iterator();
-                while (itSpec.hasNext()) {
-                    Collection colIfOps =
-                        Model.getFacade().getOperations(itSpec.next());
-                    if (colIfOps != null) {
-                        Iterator itIfOps = colIfOps.iterator();
-                        while (itIfOps.hasNext()) {
-                            Object op = itIfOps.next();
-                            sClsOp += "\n";
+            for (Object spec : Model.getFacade()
+                    .getSpecifications(modelElement)) {
+                for (Object operation : Model.getFacade().getOperations(spec)) {
+                    sClsOp += "\n";
 
-                            PHPDocumentor objPHPDoc = null;
-                            try {
-                                objPHPDoc = new PHPDocumentor(op);
-                            } catch (Exception exp) {
-                                LOG.error("Generating operation DocBlock "
-                                        + "FAILED: " + exp.getMessage());
-                            } finally {
-                                if (objPHPDoc != null) {
-                                    sClsOp += objPHPDoc.toString(INDENT);
-                                }
-                            }
-
-                            sClsOp += INDENT + generateOperation(op, false);
-                            sClsOp += generateMethodBody(op, true);
+                    PHPDocumentor objPHPDoc = null;
+                    try {
+                        objPHPDoc = new PHPDocumentor(operation);
+                    } catch (Exception exp) {
+                        LOG.error("Generating operation DocBlock " + "FAILED: "
+                                + exp.getMessage());
+                    } finally {
+                        if (objPHPDoc != null) {
+                            sClsOp += objPHPDoc.toString(INDENT);
                         }
                     }
+
+                    sClsOp += INDENT + generateOperation(operation, false);
+                    sClsOp += generateMethodBody(operation, true);
                 }
             }
         }
 
-        Collection colOperations =
-            Model.getFacade().getOperations(modelElement);
-        if (colOperations != null) {
-            Iterator itOperations = colOperations.iterator();
-            while (itOperations.hasNext()) {
-                Object op = itOperations.next();
+        for (Object operation : Model.getFacade().getOperations(modelElement)) {
 
-                sClsOp += "\n";
-                PHPDocumentor objPHPDoc = null;
-                try {
-                    objPHPDoc = new PHPDocumentor(op);
-                } catch (Exception exp) {
-                    LOG.error("Generating operation DocBlock FAILED: "
-                            + exp.getMessage());
-                } finally {
-                    if (objPHPDoc != null) {
-                        sClsOp += objPHPDoc.toString(INDENT);
-                    }
+            sClsOp += "\n";
+            PHPDocumentor objPHPDoc = null;
+            try {
+                objPHPDoc = new PHPDocumentor(operation);
+            } catch (Exception exp) {
+                LOG.error("Generating operation DocBlock FAILED: "
+                        + exp.getMessage());
+            } finally {
+                if (objPHPDoc != null) {
+                    sClsOp += objPHPDoc.toString(INDENT);
                 }
+            }
 
-                sClsOp += INDENT + generateOperation(op, false);
+            sClsOp += INDENT + generateOperation(operation, false);
 
-                if (Model.getFacade().isAClass(modelElement)) {
-                    sClsOp += generateMethodBody(op, false);
+            if (Model.getFacade().isAClass(modelElement)) {
+                sClsOp += generateMethodBody(operation, false);
+            } else {
+                if (iLanguageMajorVersion < 5) {
+                    sClsOp += "\n" + INDENT + "{\n";
+                    sClsOp += INDENT + INDENT
+                    + "die('abstract method called');\n";
+                    sClsOp += INDENT + "}\n";
                 } else {
-                    if (iLanguageMajorVersion < 5) {
-                        sClsOp += "\n" + INDENT + "{\n";
-                        sClsOp += INDENT + INDENT
-                                + "die('abstract method called');\n";
-                        sClsOp += INDENT + "}\n";
-                    } else {
-                        sClsOp += ";\n";
-                    }
+                    sClsOp += ";\n";
                 }
             }
         }
-
+        
         return sClsOp;
     }
 
@@ -1241,38 +1280,37 @@ public class GeneratorPHP4 implements CodeGenerator {
 
         if (Model.getFacade().isAClass(modelElement)) {
             Collection colSpecifications =
-                    Model.getFacade().getSpecifications(modelElement);
-            if (colSpecifications != null) {
-                Iterator itSpecifications = colSpecifications.iterator();
-                if (itSpecifications.hasNext()) {
-                    if (iLanguageMajorVersion < 5) {
-                        sClsSpec += INDENT + INDENT + "/* specifications are "
-                                + "not supported by PHP versions before 5.0 "
-                                + "*/\n";
-                    }
-                    sClsSpec += INDENT + INDENT;
-                    if (iLanguageMajorVersion < 5) {
-                        sClsSpec += "/* ";
-                    }
-                    sClsSpec += "implements ";
-
-                    while (itSpecifications.hasNext()) {
-                        Object ifSpecification = itSpecifications.next();
-                        sClsSpec += NameGenerator.generate(ifSpecification,
-                                iLanguageMajorVersion);
-
-                        if (itSpecifications.hasNext()) {
-                            sClsSpec += ",\n" + INDENT + INDENT + "           ";
-                        }
-                    }
-
-                    if (iLanguageMajorVersion < 5) {
-                        sClsSpec += " */";
-                    }
-
-                    sClsSpec += "\n";
+                Model.getFacade().getSpecifications(modelElement);
+            Iterator itSpecifications = colSpecifications.iterator();
+            if (itSpecifications.hasNext()) {
+                if (iLanguageMajorVersion < 5) {
+                    sClsSpec += INDENT + INDENT + "/* specifications are "
+                    + "not supported by PHP versions before 5.0 "
+                    + "*/\n";
                 }
+                sClsSpec += INDENT + INDENT;
+                if (iLanguageMajorVersion < 5) {
+                    sClsSpec += "/* ";
+                }
+                sClsSpec += "implements ";
+
+                while (itSpecifications.hasNext()) {
+                    Object ifSpecification = itSpecifications.next();
+                    sClsSpec += NameGenerator.generate(ifSpecification,
+                            iLanguageMajorVersion);
+
+                    if (itSpecifications.hasNext()) {
+                        sClsSpec += ",\n" + INDENT + INDENT + "           ";
+                    }
+                }
+
+                if (iLanguageMajorVersion < 5) {
+                    sClsSpec += " */";
+                }
+
+                sClsSpec += "\n";
             }
+            
         }
 
         return sClsSpec;
@@ -1450,13 +1488,9 @@ public class GeneratorPHP4 implements CodeGenerator {
 
         for (Object assocEnd : Model.getFacade().getAssociationEnds(
                 modelElement)) {
-            Collection otherEnds = Model.getFacade().getOtherAssociationEnds(
-                    assocEnd);
-            if (otherEnds.size() == 1) { // can't handly n-ary associations
-                Object oppositeEnd = otherEnds.iterator().next();
-                if (Model.getFacade().isNavigable(oppositeEnd)) {
-                    tsRequired.add(Model.getFacade().getType(oppositeEnd));
-                }
+            Object oppositeEnd = getNavigableOppositeEnd(assocEnd);
+            if (oppositeEnd != null) {
+                tsRequired.add(Model.getFacade().getType(oppositeEnd));
             }
         }
         
@@ -1562,8 +1596,8 @@ public class GeneratorPHP4 implements CodeGenerator {
         File tmpdir = null;
         try {
             tmpdir = TempFileUtils.createTempDir();
-            for (Iterator it = elements.iterator(); it.hasNext();) {
-                generateFile(it.next(), tmpdir.getName());
+            for (Object element : elements) {
+                generateFile(element, tmpdir.getName());
             }
             return TempFileUtils.readFileNames(tmpdir);
         } finally {
