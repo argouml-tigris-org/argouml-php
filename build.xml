@@ -19,7 +19,8 @@
     <property name="argo.root.dir" value="${basedir}/../argouml" />
     <property file="${override.build.properties}"/>
 
-    <property name="argo.build.dir" value="${argo.root.dir}/build"/>
+    <property name="argo.src.dir" value="${argo.root.dir}/src/argouml-app/src"/>
+    <property file="${argo.src.dir}/default.properties"/>
 
     <property name="module.root" value="${basedir}"/>
     <property name="module.src.dir" value="${module.root}/src"/>
