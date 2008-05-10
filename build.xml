@@ -46,7 +46,7 @@
     <property name="debug" value="off"/>
     <property name="optimize" value="on"/>
     <property name="deprecation" value="on"/>
-    <property name="developer.lib.dir" value="${argo.build.dir}"/>
+    <property name="result.dir" value="${argo.root.dir}/build"/>
 
   </target>
 
@@ -129,7 +129,7 @@
   <!-- Clean targets                                                       -->
   <!-- =================================================================== -->
   <target name="clean" depends="init">
-    <delete file="${developer.lib.dir}/ext/${module.jarfile.name}"/>
+    <delete file="${result.dir}/ext/${module.jarfile.name}"/>
     <delete file="${argo.build.dir}/ext/${module.jarfile.name}"/>
     <delete dir="${module.build.dir}"/>
   </target>
@@ -138,7 +138,7 @@
   <!-- Move the jar file into the extension directory.                     -->
   <!-- =================================================================== -->
   <target name="install" depends="jar">
-    <copy todir="${developer.lib.dir}/ext">
+    <copy todir="${result.dir}/ext">
       <fileset dir="${module.build.dir}" includes="${module.jarfile.name}"/>
     </copy>
   </target>
