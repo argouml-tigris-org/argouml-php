@@ -43,6 +43,14 @@
     <property file="${user.home}/.argo.ant.properties"/>
     <property file="${user.home}/.ant.properties"/>
 
+    <path id="compile.classpath">
+      <fileset dir="../argouml/build" includes="*.jar"/>
+    </path>
+
+    <path id="run.classpath">
+      <path refid="compile.classpath"/>
+    </path>
+
     <property name="debug" value="off"/>
     <property name="optimize" value="on"/>
     <property name="deprecation" value="on"/>
@@ -81,9 +89,7 @@
            deprecation="${deprecation}"
            optimize="${optimize}">
         <classpath>
-            <pathelement location="${argo.build.dir}/argouml.jar"/>
-            <pathelement location="${argo.build.dir}/log4j.jar"/>
-            <pathelement location="${argo.build.dir}/argouml-model.jar"/>
+            <path refid="compile.classpath"/>
         </classpath>
      </javac>
   </target>
@@ -111,15 +117,7 @@
             <fileset dir="${module.build.dir}">
                 <include name="${module.jarfile.name}" />
 	    </fileset>
-            <pathelement location="${argo.build.dir}/argouml.jar"/>
-            <pathelement location="${ocl-argo.jar.path}"/>
-            <pathelement location="${gef.jar.path}"/>
-            <pathelement location="${log4j.jar.path}"/>
-            <pathelement location="${swidgets.jar.path}"/>
-            <pathelement location="${toolbar.jar.path}"/>
-            <pathelement location="${commons-logging.jar.path}"/>
-            <pathelement location="${antlrall.jar.path}"/>
-            <pathelement location="${argo.build.dir}/argouml-model.jar"/>
+            <path refid="run.classpath"/>
         </classpath>
 
     </java>
