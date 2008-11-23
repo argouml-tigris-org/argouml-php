@@ -974,7 +974,8 @@ public class GeneratorPHP4 implements CodeGenerator {
             if (!parentDir.exists()) {
                 parentDir.mkdirs();
             }
-
+            // TODO: This is using the default platform character encoding
+            // specifying an encoding will produce more predictable results
             bwOutput = new BufferedWriter(new FileWriter(file));
             bwOutput.write(sOutput);
         } catch (IOException exp) {
