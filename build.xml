@@ -33,6 +33,8 @@
     <property name="module.build.src" value="${module.src.dir}"/>
     <property name="module.build.dest" value="${module.build.dir}/classes"/>
 
+    <property name="argo.build.dir" value="../argouml/build"/>
+
     <property name="argo.jarfile"
               value="${argo.build.dir}/argouml.jar"/>
     <property name="module.jarfile.name"
