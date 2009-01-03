@@ -19,19 +19,23 @@
     <property name="argo.root.dir" value="${basedir}/../argouml" />
     <property file="${override.build.properties}"/>
 
-    <property name="argo.src.dir" value="${argo.root.dir}/src/argouml-app/src"/>
-    <property file="${argo.src.dir}/default.properties"/>
-
     <property name="module.root" value="${basedir}"/>
     <property name="module.src.dir" value="${module.root}/src"/>
 
-    <property name="packages" value="org.argouml.*"/>
     <property name="manifest" value="manifest.mf"/>
     <property name="manifest.src" value="${module.src.dir}/org/${manifest}"/>
 
     <property name="module.build.dir" value="${module.root}/build"/>
     <property name="module.build.src" value="${module.src.dir}"/>
     <property name="module.build.dest" value="${module.build.dir}/classes"/>
+
+    <!-- figure out where main ArgoUML build directory is -->
+    <available file="../argouml-build/build" 
+               type="dir" property="argo.build.dir"
+               value="../argouml-build/build"/>
+    <available file="../argouml/build" 
+               type="dir" property="argo.build.dir"
+               value="../argouml/build"/>
 
     <property name="argo.jarfile"
               value="${argo.build.dir}/argouml.jar"/>
