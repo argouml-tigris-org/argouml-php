@@ -3,7 +3,6 @@
 	<name>argouml-module-php</name>
 	<comment></comment>
 	<projects>
-		<project>argouml</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
