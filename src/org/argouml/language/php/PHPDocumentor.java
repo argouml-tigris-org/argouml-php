@@ -1,5 +1,5 @@
 // $Id$
-// Copyright (c) 2004-2008 The Regents of the University of California. All
+// Copyright (c) 2004-2009 The Regents of the University of California. All
 // Rights Reserved. Permission to use, copy, modify, and distribute this
 // software and its documentation without fee, and without a written
 // agreement is hereby granted, provided that the above copyright notice
@@ -303,7 +303,7 @@ public final class PHPDocumentor {
         int iSec  = calNow.get(Calendar.SECOND);
 
         String sProjectName = null;
-        Object objModel = Model.getFacade().getModel(modelElement);
+        Object objModel = Model.getFacade().getRoot(modelElement);
         if (objModel != null) {
             sProjectName = Model.getFacade().getName(objModel);
         }
