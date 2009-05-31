@@ -28,6 +28,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -78,7 +79,7 @@ public class GeneratorPHP4 implements CodeGenerator {
     /**
      * Zero-argument class constructor
      */
-    GeneratorPHP4() {
+    public GeneratorPHP4() {
         this(ModulePHP4.LANGUAGE_MAJOR_VERSION);
     }
 
@@ -1578,14 +1579,18 @@ public class GeneratorPHP4 implements CodeGenerator {
     /*
      * @see org.argouml.uml.generator.CodeGenerator#generateFiles(java.util.Collection, java.lang.String, boolean)
      */
-    public Collection generateFiles(Collection elements, String path,
+    public Collection<String> generateFiles(Collection elements, String path,
             boolean deps) {
         LOG.debug("generateFiles() called");
         // TODO: 'deps' is ignored here
-        for (Iterator it = elements.iterator(); it.hasNext();) {
-            generateFile(it.next(), path);
+        Collection<String> filenames = new ArrayList<String>();
+        for (Object element : elements) {
+            String filename = generateFile(element, path);
+            if (filename != null) {
+                filenames.add(filename);
+            }
         }
-        return TempFileUtils.readFileNames(new File(path));
+        return filenames;
     }
 
     /*
