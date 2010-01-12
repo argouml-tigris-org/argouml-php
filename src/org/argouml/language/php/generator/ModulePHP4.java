@@ -103,7 +103,7 @@ public class ModulePHP4 implements ModuleInterface {
         case AUTHOR:
             return "Kai Schr\u00F6der";
         case VERSION:
-            return "0.0.$Revision: 31 $";
+            return "0.0.$Revision$";
         default:
             return null;
         }
