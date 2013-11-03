@@ -1,6 +1,6 @@
 /* $Id$
  *****************************************************************************
- * Copyright (c) 2009 Contributors - see below
+ * Copyright (c) 2009-2013 Contributors - see below
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *    tfmorris
+ *    Laurent BRAUD
  *****************************************************************************
  *
  * Some portions of this file was previously release using the BSD License:
@@ -78,13 +79,21 @@ public final class NameGenerator {
         String sModelElementName = "";
 
         if (Model.getFacade().isAPackage(modelElement)) {
-            return generatePackageName(modelElement);
+            sModelElementName = generatePackageName(modelElement);
         } else if (Model.getFacade().isAClassifier(modelElement)) {
-            return generateClassifierName(modelElement);
+            sModelElementName = generateClassifierName(modelElement);
         } else if (Model.getFacade().isAAttribute(modelElement)) {
-            return generateAttributeName(modelElement, iMajorVersion);
+            sModelElementName = generateAttributeName(modelElement, iMajorVersion);
         } else if (Model.getFacade().isAOperation(modelElement)) {
-            return generateOperationName(modelElement, iMajorVersion);
+            sModelElementName = generateOperationName(modelElement, iMajorVersion);
+        } else if (Model.getFacade().isAAssociationEnd(modelElement)) {
+            String name = Model.getFacade().getName(modelElement);
+            if (name == null) {
+                Object typeAssEnd =  Model.getFacade().getType(modelElement);
+                Object nameTypeAssEnd =  Model.getFacade().getName(typeAssEnd);
+                name = "my" + nameTypeAssEnd;
+            }
+            sModelElementName = name;
         } else {
             try {
                 sModelElementName = Model.getFacade().getName(modelElement);
@@ -212,6 +221,35 @@ public final class NameGenerator {
         if (iMajorVersion < 5 && !(Model.getFacade().isPublic(modelElement))) {
             return "_" + sAttributeName;
         } 
+        return sAttributeName;
+    }
+    
+    /**
+     * 
+     * @param modelElement
+     * @param iMajorVersion
+     * @return
+     */
+    protected static final String generateAssociationEndName(
+            Object modelElement, int iMajorVersion) {
+        if (!Model.getFacade().isAAssociationEnd(modelElement)) {
+            throw new ClassCastException(modelElement.getClass()
+                    + " has wrong object type, AssociationEnd required");
+        }
+
+        String sAttributeName = Model.getFacade().getName(modelElement);
+        if (sAttributeName == null) {
+            Object typeAssEnd = Model.getFacade().getType(modelElement);
+            Object nameTypeAssEnd = Model.getFacade().getName(typeAssEnd);
+            String name = Model.getFacade().getName(modelElement);
+            if (name == null) {
+                name = "my" + nameTypeAssEnd;
+            }
+        }
+            
+        if (iMajorVersion < 5 && !(Model.getFacade().isPublic(modelElement))) {
+            return "_" + sAttributeName;
+        }
         return sAttributeName;
     }
 

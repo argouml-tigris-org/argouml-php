@@ -1,6 +1,6 @@
-/* $Id$
+/* $Id: ModulePHP5.java 204 2010-01-12 19:15:17Z linus $
  *****************************************************************************
- * Copyright (c) 2009 Contributors - see below
+ * Copyright (c) 2009-2013 Contributors - see below
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *    tfmorris
+ *    Laurent Braud
  *****************************************************************************
  *
  * Some portions of this file was previously release using the BSD License:
@@ -41,17 +42,24 @@ package org.argouml.language.php.generator;
 /**
  * Module manager for PHP5 generator.
  * 
- * This has a somewhat unusual style. Rather than overriding methods in the base
- * PHP5 code generator, we just pass it a parameter at construction time to tell
- * it to properly condition its behavior.
+ * This has a somewhat unusual style. Rather than overriding methods
+ * in the base PHP5 code generator, we just pass it a parameter at
+ * construction time to tell it to properly condition its behavior.
  */
 public class ModulePHP5 extends ModulePHP4 {
+
+    public final static int LANGUAGE_MAJOR_VERSION_5 = 5; 
 
     /**
      * Construct a new PHP 5 module.
      */
     public ModulePHP5() {
-        super(5);
+        super(LANGUAGE_MAJOR_VERSION_5);
     }
 
+    
+    protected GeneratorPHP4 getGeneratorPHP() {
+        return  new GeneratorPHP5();
+    }
+    
 }

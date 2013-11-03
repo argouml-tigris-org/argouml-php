@@ -8,6 +8,7 @@
  *
  * Contributors:
  *    mvw
+ *    Laurent BRAUD
  *****************************************************************************
  *
  * Some portions of this file was previously release using the BSD License:
@@ -298,6 +299,27 @@ public final class PHPDocumentor {
     }
 
     /**
+     * The datatype should be a valid PHP type (int, string, bool, etc), a class name for the type of object, or simply "mixed". 
+     * 
+     * 
+     * @param modelElement
+     * @return
+     */
+    protected final String convertType(Object modelElement) {
+        String sName = Model.getFacade().getName(modelElement).trim();
+
+        // Convert the UML TYpe in a valid PHP Type 
+        if (sName.equals("Integer")) {
+            sName = "int";
+        } else if (sName.equals("String")) {
+            sName = "string";
+        }
+        // If not fin, can be a class or a good 
+
+        return sName;
+    }
+    
+    /**
      * Updates a file level DocBlock for the given model element
      *
      * @param modelElement The model element to document.
@@ -536,12 +558,13 @@ public final class PHPDocumentor {
                 StringBuffer description = new StringBuffer(" ");
                 Object type = Model.getFacade().getType(parameter);
                 if (type != null) {
-                    description.append(Model.getFacade().getName(type));
+                    //description.append(Model.getFacade().getName(type));
+                    description.append(convertType(type));
                 }
                 description.append(" ");
                 String name = Model.getFacade().getName(parameter);
                 if (name != null) {
-                    description.append(name);
+                    description.append("$" + name);
                 }
                 String doc = Model.getFacade().getTaggedValueValue(parameter,
                         "documentation");
@@ -798,7 +821,7 @@ public final class PHPDocumentor {
                                 if (sLine.trim() != "") {
                                     sWrapped += sIndent + " * " + sLine + "\n";
                                 }
-                                sLine = "";
+                                sLine = sLineToken;
                             }
                         }
 

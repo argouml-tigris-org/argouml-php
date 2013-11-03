@@ -1,6 +1,6 @@
-/* $Id$
+/* $Id: ModulePHP4.java 204 2010-01-12 19:15:17Z linus $
  *****************************************************************************
- * Copyright (c) 2009 Contributors - see below
+ * Copyright (c) 2009-2013 Contributors - see below
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *    tfmorris
+ *    Laurent BRAUD
  *****************************************************************************
  *
  * Some portions of this file was previously release using the BSD License:
@@ -117,7 +118,7 @@ public class ModulePHP4 implements ModuleInterface {
         case AUTHOR:
             return "Kai Schr\u00F6der";
         case VERSION:
-            return "0.0.$Revision$";
+            return "0.0.$Revision: 204 $";
         default:
             return null;
         }
@@ -132,10 +133,17 @@ public class ModulePHP4 implements ModuleInterface {
                     LANGUAGE_NAME + version,
                     ResourceLoaderWrapper.lookupIconResource(ICON_NAME));
         }
-        GeneratorManager.getInstance().addGenerator(myLang, 
-                new GeneratorPHP4(version));
+        GeneratorManager.getInstance().addGenerator(myLang, getGeneratorPHP());
         logModuleInfo();
         return true;
+    }
+    
+    /**
+     * Get the generator for the module
+     * @return
+     */
+    protected GeneratorPHP4 getGeneratorPHP() {
+        return  new GeneratorPHP4(version);
     }
     /*
      * @see org.argouml.moduleloader.ModuleInterface#disable()

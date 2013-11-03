@@ -1,6 +1,6 @@
-/* $Id$
+/* $Id: GeneratorPHP4.java 204 2010-01-12 19:15:17Z linus $
  *****************************************************************************
- * Copyright (c) 2009 Contributors - see below
+ * Copyright (c) 2009-2013 Contributors - see below
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *    tfmorris
+ *    Laurent BRAUD
  *****************************************************************************
  *
  * Some portions of this file was previously release using the BSD License:
@@ -37,6 +38,8 @@
 // UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 package org.argouml.language.php.generator;
+
+import static org.argouml.model.Model.getExtensionMechanismsHelper;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -133,6 +136,18 @@ public class GeneratorPHP4 implements CodeGenerator {
      * @return Generated notation for model element.
      */
     private String generateOperation(Object modelElement, boolean bAddDocs) {
+        return generateOperation(modelElement, bAddDocs, null);
+    }
+    
+    /**
+     * Generates operation
+     * @param modelElement
+     * @param bAddDocs
+     * @param name not null to force it (generator/)
+     *                  
+     * @return
+     */
+    private String generateOperation(Object modelElement, boolean bAddDocs, String name) {
         if (!Model.getFacade().isAOperation(modelElement)) {
             throw new ClassCastException(modelElement.getClass()
                     + " has wrong object type, Operation required");
@@ -183,8 +198,12 @@ public class GeneratorPHP4 implements CodeGenerator {
             }
         }
 
-        String sOperationName = NameGenerator.generate(modelElement,
-                iLanguageMajorVersion);
+        
+        String sOperationName = name;
+        
+        if (sOperationName == null) {
+            sOperationName = NameGenerator.generate(modelElement, iLanguageMajorVersion);
+        }
 
         if (bReturnByReference) {
             sOperationName = "&" + sOperationName;
@@ -223,9 +242,11 @@ public class GeneratorPHP4 implements CodeGenerator {
      * @return Generated notation for model element.
      */
     private String generateAttribute(Object modelElement, boolean bAddDocs) {
-        if (!Model.getFacade().isAAttribute(modelElement)) {
+        boolean attribute = Model.getFacade().isAAttribute(modelElement);
+        boolean associationEnd = Model.getFacade().isAAssociationEnd(modelElement);
+        if (!attribute && !associationEnd) {
             throw new ClassCastException(modelElement.getClass()
-                    + " has wrong object type, Attribute required");
+                    + " has wrong object type, Attribute or AssociationEnd required");
         }
 
         String sAttribute = "";
@@ -266,32 +287,37 @@ public class GeneratorPHP4 implements CodeGenerator {
         sAttribute += NameGenerator.generate(modelElement,
                 iLanguageMajorVersion);
 
-        String sInitialValue = null;
-        Object exprInitialValue = 
-            Model.getFacade().getInitialValue(modelElement);
-        if (exprInitialValue != null) {
-            sInitialValue = generateDefaultValue(
-                    Model.getFacade().getType(modelElement),
-                    generateExpression(exprInitialValue).trim(), false);
-        } else {
-            sInitialValue = generateDefaultValue(
-                    Model.getFacade().getType(modelElement), null, false);
-        }
+        if (attribute) {
+            String sInitialValue = null;
+            Object exprInitialValue = Model.getFacade().getInitialValue(
+                    modelElement);
+            if (exprInitialValue != null) {
+                sInitialValue = generateDefaultValue(
+                        Model.getFacade().getType(modelElement),
+                        generateExpression(exprInitialValue).trim(), false);
+            } else {
+                sInitialValue = generateDefaultValue(
+                        Model.getFacade().getType(modelElement), null, false);
+            }
 
-        if (sInitialValue != null && sInitialValue.length() > 0) {
-            sAttribute += " = " + sInitialValue;
+            if (sInitialValue != null && sInitialValue.length() > 0) {
+                sAttribute += " = " + sInitialValue;
+            } else {
+                sAttribute += "[ ";
+                sAttribute += (exprInitialValue != null) ? "!= null" : "null";
+                sAttribute += " | ";
+                sAttribute += generateDefaultValue(
+                        Model.getFacade().getType(modelElement),
+                        generateExpression(exprInitialValue).trim(), false);
+                sAttribute += " | ";
+                sAttribute += generateDefaultValue(
+                        Model.getFacade().getType(modelElement),
+                        generateExpression(exprInitialValue).trim(), true);
+                sAttribute += " ]";
+            }
         } else {
-            sAttribute += "[ ";
-            sAttribute += (exprInitialValue != null) ? "!= null" : "null";
-            sAttribute += " | ";
-            sAttribute += generateDefaultValue(
-                Model.getFacade().getType(modelElement),
-                    generateExpression(exprInitialValue).trim(), false);
-            sAttribute += " | ";
-            sAttribute += generateDefaultValue(
-                Model.getFacade().getType(modelElement),
-                    generateExpression(exprInitialValue).trim(), true);
-            sAttribute += " ]";
+            // associationEnd
+            sAttribute += " = null";
         }
 
         sAttribute += ";";
@@ -555,6 +581,7 @@ public class GeneratorPHP4 implements CodeGenerator {
                 if (oppositeEnd != null) {
                     text.append(INDENT);
                     text.append(generateAssociationEnd(oppositeEnd));
+                    text.append("\n");
                 }
             }
         }
@@ -634,13 +661,17 @@ public class GeneratorPHP4 implements CodeGenerator {
         }
         
         ///// TODO: This can be generated in much the same way as an Attribute
-        
+        /*Object typeAssEnd =  Model.getFacade().getType(modelElement);
+        Object nameTypeAssEnd =  Model.getFacade().getName(typeAssEnd);
         String name = Model.getFacade().getName(modelElement);
         if (name == null) {
-            name = "";    
+            name = "my" + nameTypeAssEnd;
         }
-
-        return "// generateAssociationEnd : " + name;
+        */
+        //return // generateAssociationEnd : " + name);
+        StringBuilder code =  new StringBuilder();
+        code.append(generateAttribute(modelElement, false));
+        return code.toString();
     }
 
     /*
@@ -788,7 +819,8 @@ public class GeneratorPHP4 implements CodeGenerator {
             return "bool";
         }
 
-        if (sName.equals("int")) {
+        // Integer is value if UML Element
+        if (sName.equals("int") || sName.equals("Integer")) {
             return "int";
         }
         if (sName.equals("byte")) {
@@ -809,10 +841,12 @@ public class GeneratorPHP4 implements CodeGenerator {
         }
 
         /* user defined type string, not (java.lang.)String */
-        if (sName.equals("string")) {
+        // String is value if UML Element
+        if (sName.equals("string") || sName.equals("String")) {
             return "string";
         }
-
+        
+        
         /* user defined type array */
         if (sName.equals("array")) {
             return "array";
@@ -1209,7 +1243,7 @@ public class GeneratorPHP4 implements CodeGenerator {
                     sClsOp += INDENT + " * @return void\n";
                     sClsOp += INDENT + " *\n";
                     sClsOp += INDENT + " * @author ArgoUML PHP Module"
-                                    + " (revised $Date$)\n";
+                                    + " (revised $Date: 2010-01-12 20:15:17 +0100 (mar., 12 janv. 2010) $)\n";
                     sClsOp += INDENT + " */\n";
 
                     sClsOp += INDENT + sConstructor + "()\n";
@@ -1260,8 +1294,15 @@ public class GeneratorPHP4 implements CodeGenerator {
                 }
             }
 
-            sClsOp += INDENT + generateOperation(operation, false);
-
+            // 
+            String sName = null;
+            if (Model.getFacade().isConstructor(operation)) {
+                sName = getConstructorName(operation);
+            } else if (isDestructor(operation)) {
+                sName = getDestructorName(operation);
+            }
+            sClsOp += INDENT + generateOperation(operation, false, sName);
+            
             if (Model.getFacade().isAClass(modelElement)) {
                 sClsOp += generateMethodBody(operation, false);
             } else {
@@ -1279,6 +1320,32 @@ public class GeneratorPHP4 implements CodeGenerator {
         return sClsOp;
     }
 
+    /**
+     * PHP4: A constructor have the same name than class
+     * @return
+     */
+    protected String getDestructorName(Object operation) {
+        return null;
+    }
+
+    /**
+     * PHP4: A constructor have the same name than class
+     * @return
+     */
+    protected String getConstructorName(Object operation) {
+        return null;
+    }
+
+    /**
+     * Get From org.argouml.language.cpp.generator.GeneratorCpp
+     * 
+     * @param op
+     * @return
+     * 
+     */
+    private boolean isDestructor(Object op) {
+        return getExtensionMechanismsHelper().hasStereotype(op, "destroy");
+    }
     /*
      * Generates classifier specifications
      *
