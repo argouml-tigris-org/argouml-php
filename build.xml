@@ -83,7 +83,10 @@
            excludes="*.txt,*.bat,*.xml,*.sh"
            debug="${debug}"
            deprecation="${deprecation}"
-           optimize="${optimize}">
+           optimize="${optimize}"
+           source="1.5"
+           target="1.5"
+	>
         <classpath>
             <pathelement location="${argo.build.dir}/argouml.jar"/>
             <pathelement location="${argo.build.dir}/log4j.jar"/>
