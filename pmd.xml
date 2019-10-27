@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pmd version="4.3" timestamp="2019-10-27T22:19:08.187">
+<file name="/home/linus/project/argouml/github-repo/argouml-php/src/org/argouml/language/php/PHPDocumentor.java">
+<violation beginline="308" endline="320" begincolumn="21" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="329" endline="376" begincolumn="19" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="385" endline="401" begincolumn="19" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="410" endline="454" begincolumn="19" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="464" endline="498" begincolumn="19" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="507" endline="578" begincolumn="19" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="664" endline="666" begincolumn="18" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="676" endline="681" begincolumn="18" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="738" endline="740" begincolumn="22" endcolumn="9" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor$DocBlock" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="749" endline="782" begincolumn="22" endcolumn="9" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor$DocBlock" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="772" endline="774" begincolumn="25" endcolumn="25" rule="CollapsibleIfStatements" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor$DocBlock" method="toString" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#CollapsibleIfStatements" priority="3">
+These nested if statements could be combined
+</violation>
+<violation beginline="792" endline="845" begincolumn="23" endcolumn="9" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor$DocBlock" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="855" endline="862" begincolumn="22" endcolumn="9" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor$DocBlock" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="872" endline="879" begincolumn="22" endcolumn="9" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor$DocBlock" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="888" endline="935" begincolumn="25" endcolumn="9" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor$DocBlock" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="944" endline="964" begincolumn="25" endcolumn="9" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor$DocBlock" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="976" endline="992" begincolumn="22" endcolumn="9" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor$DocBlock" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="1002" endline="1017" begincolumn="23" endcolumn="9" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor$DocBlock" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="1030" endline="1052" begincolumn="22" endcolumn="9" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor$DocBlock" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="1065" endline="1116" begincolumn="22" endcolumn="9" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor$DocBlock" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="1129" endline="1167" begincolumn="23" endcolumn="9" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor$DocBlock" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+</file>
+<file name="/home/linus/project/argouml/github-repo/argouml-php/src/org/argouml/language/php/generator/GeneratorPHP4.java">
+<violation beginline="115" endline="115" begincolumn="20" endcolumn="47" rule="UnusedPrivateMethod" ruleset="Unused Code Rules" package="org.argouml.language.php.generator" class="GeneratorPHP4" method="generateSubmachine" externalInfoUrl="http://pmd.sourceforge.net/rules/unusedcode.html#UnusedPrivateMethod" priority="3">
+Avoid unused private methods such as 'generateSubmachine(Object)'.
+</violation>
+<violation beginline="443" endline="443" begincolumn="20" endcolumn="55" rule="UnusedPrivateMethod" ruleset="Unused Code Rules" package="org.argouml.language.php.generator" class="GeneratorPHP4" method="generatePackage" externalInfoUrl="http://pmd.sourceforge.net/rules/unusedcode.html#UnusedPrivateMethod" priority="3">
+Avoid unused private methods such as 'generatePackage(Object)'.
+</violation>
+<violation beginline="616" endline="616" begincolumn="20" endcolumn="59" rule="UnusedPrivateMethod" ruleset="Unused Code Rules" package="org.argouml.language.php.generator" class="GeneratorPHP4" method="generateAssociation" externalInfoUrl="http://pmd.sourceforge.net/rules/unusedcode.html#UnusedPrivateMethod" priority="3">
+Avoid unused private methods such as 'generateAssociation(Object)'.
+</violation>
+<violation beginline="684" endline="684" begincolumn="20" endcolumn="60" rule="UnusedPrivateMethod" ruleset="Unused Code Rules" package="org.argouml.language.php.generator" class="GeneratorPHP4" method="generateMultiplicity" externalInfoUrl="http://pmd.sourceforge.net/rules/unusedcode.html#UnusedPrivateMethod" priority="3">
+Avoid unused private methods such as 'generateMultiplicity(Object)'.
+</violation>
+<violation beginline="770" endline="774" begincolumn="13" endcolumn="13" rule="CollapsibleIfStatements" ruleset="Basic Rules" package="org.argouml.language.php.generator" class="GeneratorPHP4" method="generateFile" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#CollapsibleIfStatements" priority="3">
+These nested if statements could be combined
+</violation>
+<violation beginline="1227" endline="1254" begincolumn="17" endcolumn="17" rule="CollapsibleIfStatements" ruleset="Basic Rules" package="org.argouml.language.php.generator" class="GeneratorPHP4" method="generateClassifierOperations" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#CollapsibleIfStatements" priority="3">
+These nested if statements could be combined
+</violation>
+</file>
+<file name="/home/linus/project/argouml/github-repo/argouml-php/src/org/argouml/language/php/generator/NameGenerator.java">
+<violation beginline="77" endline="109" begincolumn="28" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php.generator" class="NameGenerator" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="119" endline="143" begincolumn="25" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php.generator" class="NameGenerator" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="153" endline="177" begincolumn="26" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php.generator" class="NameGenerator" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="187" endline="202" begincolumn="25" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php.generator" class="NameGenerator" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="212" endline="225" begincolumn="28" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php.generator" class="NameGenerator" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="233" endline="254" begincolumn="28" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php.generator" class="NameGenerator" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="264" endline="277" begincolumn="28" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php.generator" class="NameGenerator" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="287" endline="295" begincolumn="28" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php.generator" class="NameGenerator" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+<violation beginline="309" endline="342" begincolumn="28" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php.generator" class="NameGenerator" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
+Unnecessary final modifier in final class
+</violation>
+</file>
+</pmd>
