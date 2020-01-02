@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pmd version="4.3" timestamp="2020-01-01T22:37:58.457">
+<pmd version="4.3" timestamp="2020-01-02T02:46:47.375">
 <file name="/var/jenkins_home/workspace/_organization_argouml-php_master/src/org/argouml/language/php/PHPDocumentor.java">
 <violation beginline="308" endline="320" begincolumn="21" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
 Unnecessary final modifier in final class
