@@ -51,8 +51,7 @@ PHP4 and PHP5 support for argouml.
   </description>
 
   <scm>
-    <connection>scm:svn:http://argouml-php.tigris.org/svn/argouml-php/trunk/</connection>
-    <developerConnection>scm:svn:http://argouml-php.tigris.org/svn/argouml-php/trunk/</developerConnection>
-    <url>http://argouml-php.tigris.org/source/browse/argouml-php/trunk</url>
+    <!-- Specify this or maven will add artifactId. -->
+    <url>https://github.com/argouml-tigris-org/${github.site.repositoryName}</url>
   </scm>
 </project>
