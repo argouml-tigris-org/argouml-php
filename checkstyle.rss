@@ -43,20 +43,6 @@
               </tr>
                           <tr>
                 <td>
-                  <a href="http://nexus.sonatype.org/oss-repository-hosting.html/parentpom/argouml-php/checkstyle.html#org.argouml.language.php.generator.ModulePHP4.java">org/argouml/language/php/generator/ModulePHP4.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  1
-                </td>
-                <td>
-                  0
-                </td>
-              </tr>
-                          <tr>
-                <td>
                   <a href="http://nexus.sonatype.org/oss-repository-hosting.html/parentpom/argouml-php/checkstyle.html#org.argouml.language.php.generator.NameGenerator.java">org/argouml/language/php/generator/NameGenerator.java</a>
                 </td>
                 <td>
@@ -64,6 +50,20 @@
                 </td>
                 <td>
                   5
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://nexus.sonatype.org/oss-repository-hosting.html/parentpom/argouml-php/checkstyle.html#org.argouml.language.php.generator.ModulePHP4.java">org/argouml/language/php/generator/ModulePHP4.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  1
                 </td>
                 <td>
                   0
