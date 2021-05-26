@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pmd version="4.3" timestamp="2021-05-24T14:28:13.952">
-<file name="/var/lib/jenkins/workspace/_organization_argouml-php_master@2/src/org/argouml/language/php/PHPDocumentor.java">
+<pmd version="4.3" timestamp="2021-05-26T14:56:55.442">
+<file name="/var/lib/jenkins/workspace/_organization_argouml-php_master/src/org/argouml/language/php/PHPDocumentor.java">
 <violation beginline="308" endline="320" begincolumn="21" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php" class="PHPDocumentor" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
 Unnecessary final modifier in final class
 </violation>
@@ -65,7 +65,7 @@ Unnecessary final modifier in final class
 Unnecessary final modifier in final class
 </violation>
 </file>
-<file name="/var/lib/jenkins/workspace/_organization_argouml-php_master@2/src/org/argouml/language/php/generator/GeneratorPHP4.java">
+<file name="/var/lib/jenkins/workspace/_organization_argouml-php_master/src/org/argouml/language/php/generator/GeneratorPHP4.java">
 <violation beginline="115" endline="115" begincolumn="20" endcolumn="47" rule="UnusedPrivateMethod" ruleset="Unused Code Rules" package="org.argouml.language.php.generator" class="GeneratorPHP4" method="generateSubmachine" externalInfoUrl="http://pmd.sourceforge.net/rules/unusedcode.html#UnusedPrivateMethod" priority="3">
 Avoid unused private methods such as 'generateSubmachine(Object)'.
 </violation>
@@ -85,7 +85,7 @@ These nested if statements could be combined
 These nested if statements could be combined
 </violation>
 </file>
-<file name="/var/lib/jenkins/workspace/_organization_argouml-php_master@2/src/org/argouml/language/php/generator/NameGenerator.java">
+<file name="/var/lib/jenkins/workspace/_organization_argouml-php_master/src/org/argouml/language/php/generator/NameGenerator.java">
 <violation beginline="77" endline="109" begincolumn="28" endcolumn="5" rule="UnnecessaryFinalModifier" ruleset="Basic Rules" package="org.argouml.language.php.generator" class="NameGenerator" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UnnecessaryFinalModifier" priority="3">
 Unnecessary final modifier in final class
 </violation>
